@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeleCloud | Suryansh Sharma</title>
+  <meta name="author" content="Suryansh Sharma">
+  <meta name="description" content="Secure, fast, and unlimited cloud storage powered by Telegram's Bot API as the storage backend. Split, stream, and share files.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- WAKEUP OVERLAY: shown while a cold-started backend (e.g. Render free tier) is retried -->
+  <div id="wakeup-overlay" class="wakeup-overlay">
+    <div class="wakeup-card">
+      <div class="spinner spinner-lg"></div>
+      <h3>Waking up the server</h3>
+      <p>The backend went idle and is starting back up — this can take up to a minute. Hang tight.</p>
+    </div>
+  </div>
+
+  <!-- FLOATING THEME TOGGLE (hidden while the dashboard is active — it has its own) -->
+  <button id="theme-toggle" class="theme-toggle-btn" data-action="toggle-theme" title="Toggle dark mode" aria-label="Toggle dark mode">
+    <i data-lucide="moon" id="theme-toggle-icon" class="theme-icon"></i>
+  </button>
+
+  <!-- AUTH SCREEN -->
+  <div id="auth-view" class="view-container active">
+    <div class="auth-shell aurora-bg">
+      <div class="auth-brand">
+        <div class="brand-mark">
+          <span class="brand-glyph"><i data-lucide="cloud"></i></span>
+          <span class="brand-name">TeleCloud</span>
+        </div>
+        <h1 class="brand-headline">Your files, riding on <span class="grad-text">Telegram</span>.</h1>
+        <p class="brand-sub">Files are split into 18&nbsp;MiB chunks, stored in a private Telegram channel, and streamed back on demand. No disks, no limits*.</p>
+        <ul class="brand-features">
+          <li><span class="feature-icon"><i data-lucide="zap"></i></span><div><strong>Chunked &amp; concurrent</strong><span>Uploads split into 18 MiB pieces with live progress</span></div></li>
+          <li><span class="feature-icon"><i data-lucide="download"></i></span><div><strong>Resumable streaming</strong><span>Range-aware downloads, straight from Telegram to you</span></div></li>
+          <li><span class="feature-icon"><i data-lucide="link-2"></i></span><div><strong>Share anything</strong><span>Public links with optional expiry and download limits</span></div></li>
+          <li><span class="feature-icon"><i data-lucide="shield-check"></i></span><div><strong>Verified = unlimited</strong><span>Confirm your email to lift every storage cap</span></div></li>
+        </ul>
+        <div class="brand-footnote">*Unlimited for verified accounts. Unverified: 500 MiB total, 30 MiB per file.</div>
+      </div>
+
+      <div class="auth-panel">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="auth-logo-mobile"><span class="brand-glyph"><i data-lucide="cloud"></i></span> TeleCloud</div>
+            <h2>Welcome</h2>
+            <p>Sign in to your storage, or create an account.</p>
+          </div>
+          <div class="auth-tabs" role="tablist">
+            <div id="tab-login" class="auth-tab active" data-action="auth-tab" data-tab="login" role="tab">Log in</div>
+            <div id="tab-signup" class="auth-tab" data-action="auth-tab" data-tab="signup" role="tab">Sign up</div>
+            <span class="auth-tab-slider" aria-hidden="true"></span>
+          </div>
+          <div class="auth-form">
+            <form id="auth-form-el" data-action-submit="auth-submit">
+              <div class="form-group">
+                <label for="auth-email">Email</label>
+                <div class="input-wrapper has-icon">
+                  <i data-lucide="mail" class="input-icon"></i>
+                  <input type="email" id="auth-email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="auth-password">Password</label>
+                <div class="input-wrapper has-icon has-suffix">
+                  <i data-lucide="lock" class="input-icon"></i>
+                  <input type="password" id="auth-password" placeholder="Enter your password" required autocomplete="current-password">
+                  <button type="button" class="suffix-btn" data-action="toggle-password" data-target="auth-password" aria-label="Show password">
+                    <i data-lucide="eye" id="auth-password-eye" style="width:18px;height:18px;"></i>
+                  </button>
+                </div>
+              </div>
+              <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-submit">Log in</button>
+            </form>
+            <div class="auth-divider"><span>or</span></div>
+            <button type="button" id="try-demo-btn" class="btn btn-outline btn-submit" data-action="try-demo">
+              <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Try Demo — no account needed
+            </button>
+          </div>
+          <div id="auth-switch-note" class="auth-switch-note">
+            Don't have an account? <a href="#" data-action="auth-tab" data-tab="signup">Sign up.</a>
+          </div>
+        </div>
+        <nav class="social-links auth-social-links" aria-label="Project and creator links">
+          <a class="social-link social-link-star" href="https://github.com/D-Deadric-C/telecloud" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="star" aria-hidden="true"></i><span>Star GitHub repo</span>
+          </a>
+          <a class="social-link" href="https://github.com/D-Deadric-C" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="github" aria-hidden="true"></i><span>Suryansh Sharma on GitHub</span>
+          </a>
+          <a class="social-link" href="https://www.linkedin.com/in/suryansh-sharma-a76b52324/" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="linkedin" aria-hidden="true"></i><span>Suryansh Sharma on LinkedIn</span>
+          </a>
+        </nav>
+        <div class="auth-footer">
+          <i data-lucide="lock" style="width:12px;height:12px;"></i> Files stored securely via Telegram. Maintained by Suryansh Sharma.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFICATION PENDING SCREEN -->
+  <div id="verify-view" class="view-container">
+    <div class="status-shell aurora-bg">
+      <div class="status-card">
+        <div class="verify-icon-box">
+          <i data-lucide="mail-warning" style="width:30px;height:30px;"></i>
+        </div>
+        <h2 id="verify-title">Verify your email</h2>
+        <p id="verify-description">We sent a verification link to your inbox. Click it to unlock your full account.</p>
+
+        <div class="verify-limits-box">
+          <h4>Until you verify</h4>
+          <ul>
+            <li><i data-lucide="database" style="width:14px;height:14px;"></i> Total storage capped at 500 MiB</li>
+            <li><i data-lucide="upload" style="width:14px;height:14px;"></i> Max 30 MiB per uploaded file</li>
+            <li><i data-lucide="shield-check" style="width:14px;height:14px;"></i> Verification unlocks unlimited storage</li>
+          </ul>
+        </div>
+
+        <button data-action="resend-verification" class="btn btn-primary btn-verify-action">
+          <i data-lucide="send" style="width:16px;height:16px;"></i> Resend verification email
+        </button>
+        <button data-action="logout" class="btn btn-text btn-verify-action">
+          Back to login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL CONFIRM LOADING/SUCCESS SCREEN -->
+  <div id="confirm-view" class="view-container">
+    <div class="status-shell aurora-bg">
+      <div class="status-card">
+        <div id="confirm-icon-box" class="verify-icon-box">
+          <div class="spinner"></div>
+        </div>
+        <h2 id="confirm-title">Verifying email...</h2>
+        <p id="confirm-description">Please wait while we confirm your email verification token.</p>
+        <button id="confirm-action-btn" data-action="go-login" class="btn btn-primary btn-verify-action" style="display:none; margin-top:20px;">
+          Go to Log in
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD -->
+  <div id="dashboard-view" class="view-container">
+    <div class="dashboard-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-brand">
+            <span class="brand-glyph"><i data-lucide="cloud"></i></span>
+            <span class="brand-name">TeleCloud</span>
+          </div>
+
+          <div class="folder-tree">
+            <div class="folder-tree-title">Workspace</div>
+            <div class="tree-node">
+              <a href="#" class="tree-item active" id="tree-root-item" data-action="nav-folder" data-id="">
+                <i data-lucide="hard-drive" style="width:16px;height:16px;"></i> My Files
+              </a>
+              <div id="sidebar-subfolders" class="tree-item-children">
+                <!-- Subfolders populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-bottom">
+          <nav class="social-links sidebar-social-links" aria-label="Project and creator links">
+            <a class="social-link social-link-star" href="https://github.com/D-Deadric-C/telecloud" target="_blank" rel="noopener noreferrer">
+              <i data-lucide="star" aria-hidden="true"></i><span>Star GitHub repo</span>
+            </a>
+            <a class="social-link" href="https://github.com/D-Deadric-C" target="_blank" rel="noopener noreferrer">
+              <i data-lucide="github" aria-hidden="true"></i><span>Suryansh Sharma on GitHub</span>
+            </a>
+            <a class="social-link" href="https://www.linkedin.com/in/suryansh-sharma-a76b52324/" target="_blank" rel="noopener noreferrer">
+              <i data-lucide="linkedin" aria-hidden="true"></i><span>Suryansh Sharma on LinkedIn</span>
+            </a>
+          </nav>
+          <!-- Storage Quota Box -->
+          <div class="quota-box">
+            <div class="quota-label">
+              <span>Storage</span>
+              <span id="quota-percentage">0%</span>
+            </div>
+            <div class="quota-bar-bg">
+              <div id="quota-bar-fill" class="quota-bar-fill"></div>
+            </div>
+            <div id="quota-text" class="quota-subtext">
+              <i data-lucide="database" style="width:12px;height:12px;"></i> Calculating...
+            </div>
+          </div>
+
+          <!-- User Section -->
+          <div class="sidebar-user">
+            <div class="user-avatar" id="user-avatar" aria-hidden="true">?</div>
+            <div class="user-info">
+              <div id="user-email" class="user-email">user@example.com</div>
+              <div id="user-verified-badge" class="user-badge">Verified</div>
+            </div>
+            <div class="user-actions">
+              <button class="btn-icon" data-action="toggle-theme" title="Toggle dark mode" aria-label="Toggle dark mode">
+                <i data-lucide="moon" class="theme-icon" style="width:17px;height:17px;"></i>
+              </button>
+              <button data-action="logout" class="btn-icon danger-hover" title="Log out" aria-label="Log out">
+                <i data-lucide="log-out" style="width:17px;height:17px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Backdrop behind the off-canvas sidebar (mobile only) -->
+      <div class="sidebar-backdrop" data-action="close-sidebar" aria-hidden="true"></div>
+
+      <!-- Main container -->
+      <div class="main-container">
+        <!-- Unverified warning banner -->
+        <div id="unverified-banner" class="unverified-banner" style="display: none;">
+          <span><i data-lucide="mail-warning" style="width:15px;height:15px;"></i> Email unverified — storage is limited to 500 MiB total and 30 MiB per file.</span>
+          <button data-action="resend-verification">Resend verification</button>
+        </div>
+
+        <!-- Header / topbar -->
+        <div class="dashboard-header">
+          <button class="btn-icon sidebar-toggle" data-action="toggle-sidebar" title="Menu" aria-label="Open navigation menu">
+            <i data-lucide="menu" style="width:20px;height:20px;"></i>
+          </button>
+          <div id="breadcrumbs" class="breadcrumbs">
+            <span class="breadcrumb-item active">My Files</span>
+          </div>
+          <div class="header-actions">
+            <div class="search-box">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="search-input" placeholder="Search this folder" autocomplete="off" spellcheck="false">
+              <button type="button" class="search-clear" data-action="clear-search" title="Clear search" aria-label="Clear search">
+                <i data-lucide="x" style="width:13px;height:13px;"></i>
+              </button>
+            </div>
+            <div class="view-toggle" id="view-toggle" role="group" aria-label="View mode">
+              <button class="seg-btn" data-action="set-view" data-view="list" title="List view" aria-label="List view">
+                <i data-lucide="list" style="width:16px;height:16px;"></i>
+              </button>
+              <button class="seg-btn" data-action="set-view" data-view="grid" title="Grid view" aria-label="Grid view">
+                <i data-lucide="layout-grid" style="width:16px;height:16px;"></i>
+              </button>
+            </div>
+            <button data-action="open-create-folder" class="btn btn-outline">
+              <i data-lucide="folder-plus" style="width:16px;height:16px;"></i> <span class="btn-label">New folder</span>
+            </button>
+            <button data-action="trigger-upload" class="btn btn-primary">
+              <i data-lucide="upload-cloud" style="width:16px;height:16px;"></i> <span class="btn-label">Upload</span>
+            </button>
+            <!-- Hidden File Input -->
+            <input type="file" id="file-uploader" multiple style="display:none">
+          </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="dashboard-content">
+          <div id="nav-progress" class="nav-progress"></div>
+
+          <div class="table-container">
+            <table class="files-table">
+              <thead>
+                <tr>
+                  <th class="col-name">Name</th>
+                  <th class="col-size">Size</th>
+                  <th class="col-modified">Modified</th>
+                  <th class="col-actions"></th>
+                </tr>
+              </thead>
+              <tbody id="files-table-body">
+                <!-- Dynamically populated files and folders -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Grid view -->
+          <div id="files-grid" class="files-grid" style="display:none;">
+            <!-- Dynamically populated cards -->
+          </div>
+
+          <!-- Empty state -->
+          <div id="empty-state" class="empty-state" style="display:none;">
+            <div class="empty-icon-box">
+              <i data-lucide="folder-open" style="width:32px;height:32px;"></i>
+            </div>
+            <h3 id="empty-title">This folder is empty</h3>
+            <p id="empty-desc">Drag files anywhere on this window, or use the Upload button.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drag & drop overlay -->
+    <div id="drop-overlay" class="drop-overlay" aria-hidden="true">
+      <div class="drop-overlay-inner">
+        <div class="drop-icon"><i data-lucide="upload-cloud" style="width:40px;height:40px;"></i></div>
+        <h3>Drop to upload</h3>
+        <p id="drop-overlay-sub">Files will upload to the current folder</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLIC SHARE DOWNLOAD VIEW -->
+  <div id="public-view" class="view-container">
+    <div class="public-bg aurora-bg">
+      <div id="public-card" class="public-card">
+        <div class="public-logo">
+          <span class="brand-glyph"><i data-lucide="cloud"></i></span> TeleCloud
+        </div>
+
+        <!-- Loading State -->
+        <div id="public-loading">
+          <div class="spinner" style="width:36px;height:36px;margin:12px auto 20px;"></div>
+          <p style="color:var(--text-secondary); font-size:14px; text-align:center;">Retrieving file info...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="public-error" class="public-error-box" style="display:none;">
+          <div class="public-error-icon"><i data-lucide="alert-circle" style="width:32px;height:32px;"></i></div>
+          <h2>Link unavailable</h2>
+          <p id="public-error-message">This share link has expired, been revoked, or is invalid.</p>
+        </div>
+
+        <!-- Content State -->
+        <div id="public-content" style="display:none; width:100%; text-align:center;">
+          <div id="public-file-icon" class="public-file-icon">
+            <i id="public-file-icon-inner" data-lucide="file" style="width:34px;height:34px;"></i>
+          </div>
+          <h2 id="public-filename" class="public-filename">Filename.txt</h2>
+          <div id="public-filesize" class="public-filesize">0 Bytes</div>
+          <button id="public-download-btn" data-action="download-public" class="btn btn-primary public-btn-download">
+            <i data-lucide="download" style="width:18px;height:18px;"></i> Download file
+          </button>
+        </div>
+
+        <div class="public-divider"></div>
+        <div class="public-footer">
+          Shared via TeleCloud · This link may expire.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSFERS DRAWER (uploads + downloads) -->
+  <div id="upload-panel" class="upload-panel">
+    <div class="upload-panel-header">
+      <h4 id="upload-panel-title">Transfers</h4>
+      <button class="btn-icon" data-action="dismiss-upload" id="upload-dismiss-btn" disabled style="opacity: 0.5;" title="Clear finished">
+        <i data-lucide="x" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+    <div id="transfer-list">
+      <!-- One .transfer-item per active/finished upload or download -->
+    </div>
+  </div>
+
+  <!-- CREATE FOLDER MODAL -->
+  <div id="create-folder-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>New folder</h3>
+        <button data-action="close-modal" data-modal="create-folder-modal" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <form data-action-submit="create-folder">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="new-folder-name">Folder name</label>
+            <div class="input-wrapper">
+              <input type="text" id="new-folder-name" placeholder="Enter folder name" required maxlength="255">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-action="close-modal" data-modal="create-folder-modal" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create folder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RENAME MODAL -->
+  <div id="rename-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="rename-modal-title">Rename</h3>
+        <button data-action="close-modal" data-modal="rename-modal" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <form data-action-submit="rename-submit">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="rename-item-name">New name</label>
+            <div class="input-wrapper">
+              <input type="text" id="rename-item-name" placeholder="Enter new name" required maxlength="255">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-action="close-modal" data-modal="rename-modal" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Rename</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MOVE MODAL -->
+  <div id="move-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="move-modal-title">Move item</h3>
+        <button data-action="close-modal" data-modal="move-modal" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <form data-action-submit="move-submit">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="move-destination-select">Destination folder</label>
+            <div class="input-wrapper">
+              <select id="move-destination-select" required>
+                <!-- Filled dynamically -->
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-action="close-modal" data-modal="move-modal" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Move</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SHARE CONFIG MODAL -->
+  <div id="share-modal" class="modal-overlay">
+    <div class="modal-card modal-card-wide">
+      <div class="modal-header">
+        <h3 id="share-modal-title">Share file</h3>
+        <button data-action="close-modal" data-modal="share-modal" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form data-action-submit="create-share">
+          <div class="share-form-grid">
+            <div class="form-group">
+              <label for="share-expires">Expires (optional)</label>
+              <div class="input-wrapper">
+                <input type="datetime-local" id="share-expires">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="share-limit">Download limit (optional)</label>
+              <div class="input-wrapper">
+                <input type="number" id="share-limit" placeholder="Unlimited" min="1">
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:4px;">
+            <i data-lucide="link-2" style="width:16px;height:16px;"></i> Create share link
+          </button>
+        </form>
+
+        <div id="active-shares-history" class="shares-list">
+          <div class="shares-list-title">Active share links</div>
+          <div id="active-shares-list-container">
+            <!-- Dynamically populated shares list -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" data-action="close-modal" data-modal="share-modal" class="btn btn-outline">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Pre-paint: apply the saved (or system-preferred) theme before first paint
+    // so reloading never flashes the wrong theme.
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      const theme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelectorAll('.theme-icon').forEach((el) => {
+        el.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+      });
+    } catch (e) { /* ignore */ }
+
+    // Pre-paint: if a session token exists, show the app shell instead of the
+    // login screen so a reload never flashes the login page. main.js then
+    // confirms the session (and corrects to the verify screen if needed).
+    try {
+      if (localStorage.getItem('access_token')) {
+        document.getElementById('auth-view').classList.remove('active');
+        document.getElementById('dashboard-view').classList.add('active');
+      }
+    } catch (e) { /* ignore */ }
+  </script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

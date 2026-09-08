@@ -1,0 +1,3109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeleCloud | Suryansh Sharma</title>
+  <meta name="author" content="Suryansh Sharma">
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Secure, fast, and unlimited cloud storage powered by Telegram's Bot API as the storage backend. Split, stream, and share files.">
+  <!-- Fonts and Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+
+  <style>
+    /* Design Tokens */
+    :root {
+      --primary: #0f172a;
+      --primary-hover: #1e293b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --destructive: #ef4444;
+      --destructive-hover: #dc2626;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-sidebar: #f1f5f9;
+      --border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-subdued: #94a3b8;
+      
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Common Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-outline {
+      background-color: #ffffff;
+      border-color: var(--border);
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-outline:hover {
+      background-color: #f8fafc;
+      color: var(--text-primary);
+      border-color: var(--text-subdued);
+    }
+
+    .btn-danger {
+      background-color: var(--destructive);
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--destructive-hover);
+    }
+
+    .btn-text {
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 6px 12px;
+    }
+
+    .btn-text:hover {
+      background-color: #f1f5f9;
+      color: var(--text-primary);
+    }
+
+    .btn-icon {
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      background-color: #e2e8f0;
+      color: var(--text-primary);
+    }
+
+    .btn-icon.danger-hover:hover {
+      background-color: #fee2e2;
+      color: var(--destructive);
+    }
+
+    /* Common Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper input, .input-wrapper select {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: var(--font);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background-color: #ffffff;
+      outline: none;
+      transition: all 0.2s ease;
+      color: var(--text-primary);
+    }
+
+    .input-wrapper input:focus, .input-wrapper select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .input-wrapper.has-icon input {
+      padding-left: 38px;
+    }
+
+    .input-wrapper.has-suffix input {
+      padding-right: 38px;
+    }
+
+    .input-wrapper .input-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-subdued);
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    .input-wrapper .suffix-btn {
+      position: absolute;
+      right: 10px;
+      color: var(--text-subdued);
+      cursor: pointer;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input-wrapper .suffix-btn:hover {
+      color: var(--text-primary);
+    }
+
+    /* Views Layout */
+    .view-container {
+      display: none;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .view-container.active {
+      display: flex;
+    }
+
+    /* Auth Screen (Login / Signup) */
+    .auth-bg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8fafc;
+      width: 100%;
+      height: 100vh;
+      flex-direction: column;
+      padding: 24px;
+    }
+
+    .auth-card {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 440px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .auth-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .auth-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .auth-tabs {
+      display: flex;
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .auth-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .auth-form {
+      width: 100%;
+    }
+
+    .auth-form form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .auth-form .btn-submit {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      font-size: 15px;
+    }
+
+    .auth-switch-note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .auth-switch-note a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .auth-switch-note a:hover {
+      text-decoration: underline;
+    }
+
+    .auth-footer {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--text-subdued);
+      text-align: center;
+    }
+
+    /* Verification Pending Screen */
+    .verify-card {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 480px;
+    }
+
+    .verify-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background-color: rgba(37, 99, 235, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .verify-card h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .verify-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .verify-limits-box {
+      width: 100%;
+      background-color: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .verify-limits-box h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .verify-limits-box ul {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .verify-limits-box li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .verify-limits-box li::before {
+      content: "•";
+      color: var(--accent);
+      font-size: 16px;
+      line-height: 0;
+    }
+
+    .verify-card .btn-verify-action {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    /* Main Dashboard Layout */
+    .dashboard-layout {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      background-color: var(--bg-page);
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 260px;
+      height: 100%;
+      border-right: 1px solid var(--border);
+      background-color: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      justify-content: space-between;
+    }
+
+    .sidebar-top {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+      padding-left: 8px;
+    }
+
+    /* Folder Tree Section */
+    .folder-tree {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .folder-tree-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-subdued);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-left: 8px;
+      margin-bottom: 4px;
+    }
+
+    .tree-node {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .tree-item:hover {
+      background-color: #e2e8f0;
+      color: var(--text-primary);
+    }
+
+    .tree-item.active {
+      background-color: rgba(37, 99, 235, 0.08);
+      color: var(--accent);
+    }
+
+    .tree-item-children {
+      margin-left: 16px;
+      border-left: 1px solid var(--border);
+      padding-left: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tree-toggle-icon {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-subdued);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .tree-toggle-icon.expanded {
+      transform: rotate(90deg);
+    }
+
+    /* Quota Section */
+    .quota-box {
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quota-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .quota-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: #f1f5f9;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .quota-bar-fill {
+      height: 100%;
+      background-color: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .quota-subtext {
+      font-size: 11px;
+      color: var(--text-subdued);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sidebar-user {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      max-width: 150px;
+    }
+
+    .user-email {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: #16a34a;
+      background-color: #dcfce7;
+      padding: 2px 6px;
+      border-radius: 10px;
+      width: fit-content;
+      margin-top: 2px;
+    }
+
+    .user-badge.unverified {
+      color: #d97706;
+      background-color: #fef3c7;
+    }
+
+    /* Main Dashboard Right Container */
+    .main-container {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Unverified Banner */
+    .unverified-banner {
+      background-color: #fffbeb;
+      border-bottom: 1px solid #fef3c7;
+      padding: 10px 24px;
+      font-size: 13px;
+      color: #b45309;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      animation: slideDown 0.3s ease;
+    }
+
+    .unverified-banner button {
+      color: #b45309;
+      font-weight: 600;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .unverified-banner button:hover {
+      color: #78350f;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+      height: 64px;
+      border-bottom: 1px solid var(--border);
+      background-color: #ffffff;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .breadcrumb-item {
+      color: var(--text-secondary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .breadcrumb-item:hover {
+      color: var(--text-primary);
+    }
+
+    .breadcrumb-item.active {
+      color: var(--text-primary);
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .breadcrumb-separator {
+      color: var(--text-subdued);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Dashboard Main Content Scroll Area */
+    .dashboard-content {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    /* Files Table Container */
+    .table-container {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .files-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .files-table th {
+      background-color: #fafafa;
+      padding: 12px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .files-table td {
+      padding: 14px 18px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    .files-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .files-table tr {
+      transition: background-color 0.15s ease;
+    }
+
+    .files-table tr:hover {
+      background-color: #f8fafc;
+    }
+
+    /* Table Columns Width */
+    .col-name { width: 45%; }
+    .col-size { width: 15%; }
+    .col-modified { width: 25%; }
+    .col-actions { width: 15%; text-align: right; }
+    
+    .files-table th.col-actions { text-align: right; }
+
+    /* Name Item Layout */
+    .name-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .name-cell:hover {
+      color: var(--accent);
+    }
+
+    .name-cell.file-node {
+      cursor: default;
+    }
+
+    .name-cell.file-node:hover {
+      color: var(--text-primary);
+    }
+
+    .item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-folder-box {
+      background-color: rgba(37, 99, 235, 0.1);
+      color: var(--accent);
+    }
+
+    .icon-pdf-box {
+      background-color: #fee2e2;
+      color: #ef4444;
+    }
+
+    .icon-video-box {
+      background-color: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+
+    .icon-text-box {
+      background-color: #e2e8f0;
+      color: #475569;
+    }
+
+    .icon-sheet-box {
+      background-color: #dcfce7;
+      color: #16a34a;
+    }
+
+    .icon-file-box {
+      background-color: #f1f5f9;
+      color: #64748b;
+    }
+
+    .actions-cell {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .empty-icon-box {
+      width: 80px;
+      height: 80px;
+      background-color: #f1f5f9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-subdued);
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 380px;
+      line-height: 1.5;
+    }
+
+    /* Upload Progress Floating Panel (Drawer) */
+    .upload-panel {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 380px;
+      background-color: #ffffff;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      z-index: 100;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .upload-panel.active {
+      display: flex;
+    }
+
+    .upload-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background-color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .upload-panel-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .upload-panel-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .upload-file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .upload-file-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .upload-filename {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .upload-filesize {
+      font-size: 12px;
+      color: var(--text-subdued);
+      margin-top: 2px;
+    }
+
+    .upload-progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .upload-progress-text {
+      color: var(--text-secondary);
+    }
+
+    .upload-progress-percent {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .upload-bar-bg {
+      width: 100%;
+      height: 8px;
+      background-color: #f1f5f9;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .upload-bar-fill {
+      height: 100%;
+      background-color: var(--accent);
+      width: 0%;
+      transition: width 0.1s ease;
+    }
+
+    /* Modal / Dialog Base Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+      animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      background-color: #fafafa;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    /* Modal List (for share links history) */
+    .shares-list {
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .shares-list-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .share-history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .share-history-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      max-width: 75%;
+    }
+
+    .share-history-url {
+      font-weight: 600;
+      color: var(--accent);
+      word-break: break-all;
+    }
+
+    /* Public Share Page view */
+    .public-bg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8fafc;
+      width: 100%;
+      height: 100vh;
+      flex-direction: column;
+      padding: 24px;
+    }
+
+    .public-card {
+      background-color: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 520px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .public-logo {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-subdued);
+      margin-bottom: 32px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .public-file-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f1f5f9;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .public-file-icon.video {
+      background-color: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+
+    .public-filename {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
+    .public-filesize {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .public-btn-download {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+    }
+
+    .public-divider {
+      width: 100%;
+      height: 1px;
+      background-color: var(--border);
+      margin: 24px 0;
+    }
+
+    .public-footer {
+      font-size: 11px;
+      color: var(--text-subdued);
+      text-align: center;
+    }
+
+    .public-error-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .public-error-box h2 {
+      font-size: 20px;
+      color: var(--destructive);
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    .public-error-box p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* Toast System */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      box-shadow: var(--shadow-lg);
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      min-width: 300px;
+      max-width: 420px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.toast-error {
+      border-left-color: var(--destructive);
+    }
+
+    .toast.toast-success {
+      border-left-color: #16a34a;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .toast-close {
+      margin-left: auto;
+      color: var(--text-subdued);
+      cursor: pointer;
+    }
+
+    .toast-close:hover {
+      color: var(--text-primary);
+    }
+
+    /* Dim overlay when drawer is open (optional CSS effect) */
+    .dimmed-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(15, 23, 42, 0.05);
+      pointer-events: none;
+      display: none;
+      z-index: 90;
+    }
+
+    .dimmed-overlay.active {
+      display: block;
+    }
+
+    /* Animations */
+    @keyframes slideInLeft {
+      from { transform: translateX(120%); }
+      to { transform: translateX(0); }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(120%); }
+      to { transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Spinner */
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- AUTH SCREEN -->
+  <div id="auth-view" class="view-container active">
+    <div class="auth-bg">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h1>TeleCloud</h1>
+          <p>Cloud storage, powered by Telegram.</p>
+        </div>
+        <div class="auth-tabs">
+          <div id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">Log in</div>
+          <div id="tab-signup" class="auth-tab" onclick="switchAuthTab('signup')">Sign up</div>
+        </div>
+        <div class="auth-form">
+          <form id="auth-form-el" onsubmit="handleAuthSubmit(event)">
+            <div class="form-group">
+              <label for="auth-email">Email</label>
+              <div class="input-wrapper has-icon">
+                <i data-lucide="mail" class="input-icon"></i>
+                <input type="email" id="auth-email" placeholder="you@example.com" required autocomplete="email">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="auth-password">Password</label>
+              <div class="input-wrapper has-icon has-suffix">
+                <i data-lucide="lock" class="input-icon"></i>
+                <input type="password" id="auth-password" placeholder="Enter your password" required autocomplete="current-password">
+                <button type="button" class="suffix-btn" onclick="togglePasswordVisibility('auth-password')">
+                  <i data-lucide="eye" id="auth-password-eye" style="width:18px;height:18px;"></i>
+                </button>
+              </div>
+            </div>
+            <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-submit">Log in</button>
+          </form>
+        </div>
+        <div id="auth-switch-note" class="auth-switch-note">
+          Don't have an account? <a href="#" onclick="switchAuthTab('signup'); return false;">Sign up.</a>
+        </div>
+      </div>
+      <div class="auth-footer">
+        Maintained by Suryansh Sharma · <a href="https://github.com/D-Deadric-C/telecloud" target="_blank" rel="noopener noreferrer">GitHub repository</a> · <a href="https://www.linkedin.com/in/suryansh-sharma-a76b52324/" target="_blank" rel="noopener noreferrer">LinkedIn</a><br>
+        Files stored securely via Telegram.
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFICATION PENDING SCREEN -->
+  <div id="verify-view" class="view-container">
+    <div class="auth-bg">
+      <div class="auth-card verify-card">
+        <div class="verify-icon-box">
+          <i data-lucide="mail-warning" style="width:32px;height:32px;"></i>
+        </div>
+        <h2 id="verify-title">Verify your email</h2>
+        <p id="verify-description">We sent a verification link to your email address. Please click the link to verify your account.</p>
+        
+        <div class="verify-limits-box">
+          <h4>Unverified Account Limits</h4>
+          <ul>
+            <li>Total storage limit is capped at 500 MB</li>
+            <li>Maximum file upload size is 30 MB per file</li>
+            <li>Verification unlocks unlimited storage and files</li>
+          </ul>
+        </div>
+
+        <button onclick="resendVerificationEmail()" class="btn btn-outline btn-verify-action">
+          <i data-lucide="send" style="width:16px;height:16px;"></i> Resend verification email
+        </button>
+        <button onclick="enterDashboardUnverified()" class="btn btn-primary btn-verify-action">
+          Go to My Files
+        </button>
+        <button onclick="handleLogout()" class="btn btn-text btn-verify-action">
+          Back to Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL CONFIRM LOADING/SUCCESS SCREEN -->
+  <div id="confirm-view" class="view-container">
+    <div class="auth-bg">
+      <div class="auth-card verify-card">
+        <div id="confirm-icon-box" class="verify-icon-box">
+          <div class="spinner"></div>
+        </div>
+        <h2 id="confirm-title">Verifying email...</h2>
+        <p id="confirm-description">Please wait while we confirm your email verification token.</p>
+        <button id="confirm-action-btn" onclick="goToLogin()" class="btn btn-primary btn-verify-action" style="display:none; margin-top:20px;">
+          Go to Log in
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD -->
+  <div id="dashboard-view" class="view-container">
+    <div class="dashboard-layout">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-brand">
+            <i data-lucide="cloud" style="color:var(--accent)"></i> TeleCloud
+          </div>
+          
+          <div class="folder-tree">
+            <div class="folder-tree-title">My Storage</div>
+            <div class="tree-node">
+              <a href="#" class="tree-item active" id="tree-root-item" onclick="navigateToFolder(null, event)">
+                <i data-lucide="files" style="width:16px;height:16px;"></i> My Files
+              </a>
+              <div id="sidebar-subfolders" class="tree-item-children">
+                <!-- Subfolders populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <!-- Storage Quota Box -->
+          <div class="quota-box">
+            <div class="quota-label">
+              <span>Usage</span>
+              <span id="quota-percentage">0%</span>
+            </div>
+            <div class="quota-bar-bg">
+              <div id="quota-bar-fill" class="quota-bar-fill"></div>
+            </div>
+            <div id="quota-text" class="quota-subtext">
+              <i data-lucide="database" style="width:12px;height:12px;"></i> Calculating...
+            </div>
+          </div>
+
+          <!-- User Section -->
+          <div class="sidebar-user">
+            <div class="user-info">
+              <div id="user-email" class="user-email">user@example.com</div>
+              <div id="user-verified-badge" class="user-badge">Verified</div>
+            </div>
+            <button onclick="handleLogout()" class="btn-icon danger-hover" title="Log out">
+              <i data-lucide="log-out" style="width:18px;height:18px;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main container -->
+      <div class="main-container">
+        <!-- Unverified warning banner -->
+        <div id="unverified-banner" class="unverified-banner" style="display: none;">
+          <span>✉️ Your email is unverified. Storage is limited to 500 MB total and 30 MB per file.</span>
+          <div>
+            <button onclick="resendVerificationEmail()">Resend Verification</button>
+          </div>
+        </div>
+
+        <!-- Header -->
+        <div class="dashboard-header">
+          <div id="breadcrumbs" class="breadcrumbs">
+            <span class="breadcrumb-item active">My Files</span>
+          </div>
+          <div class="header-actions">
+            <button onclick="openCreateFolderModal()" class="btn btn-outline">
+              <i data-lucide="folder-plus" style="width:16px;height:16px;"></i> New Folder
+            </button>
+            <button onclick="triggerUpload()" class="btn btn-primary">
+              <i data-lucide="upload" style="width:16px;height:16px;"></i> Upload
+            </button>
+            <!-- Hidden File Input -->
+            <input type="file" id="file-uploader" style="display:none" onchange="handleFileSelected(event)">
+          </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="dashboard-content">
+          <div id="dimmed-overlay" class="dimmed-overlay"></div>
+          
+          <div class="table-container">
+            <table class="files-table">
+              <thead>
+                <tr>
+                  <th class="col-name">Name</th>
+                  <th class="col-size">Size</th>
+                  <th class="col-modified">Modified</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="files-table-body">
+                <!-- Dynamically populated files and folders -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty state -->
+          <div id="empty-state" class="empty-state" style="display:none;">
+            <div class="empty-icon-box">
+              <i data-lucide="folder-open" style="width:36px;height:36px;"></i>
+            </div>
+            <h3>This folder is empty</h3>
+            <p>Upload a file or create a subfolder to organize your workspace.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLIC SHARE DOWNLOAD VIEW -->
+  <div id="public-view" class="view-container">
+    <div class="public-bg">
+      <div id="public-card" class="public-card">
+        <div class="public-logo">TeleCloud</div>
+        
+        <!-- Loading State -->
+        <div id="public-loading">
+          <div class="spinner" style="width:40px;height:40px;margin-bottom:20px;"></div>
+          <p style="color:var(--text-secondary); font-size:14px; text-align:center;">Retrieving file info...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="public-error" class="public-error-box" style="display:none;">
+          <i data-lucide="alert-circle" style="width:48px;height:48px;color:var(--destructive)"></i>
+          <h2>Link unavailable</h2>
+          <p id="public-error-message">This share link has expired, been revoked, or is invalid.</p>
+        </div>
+
+        <!-- Content State -->
+        <div id="public-content" style="display:none; width:100%; text-align:center;">
+          <div id="public-file-icon" class="public-file-icon">
+            <i id="public-file-icon-inner" data-lucide="file" style="width:36px;height:36px;"></i>
+          </div>
+          <h2 id="public-filename" class="public-filename">Filename.txt</h2>
+          <div id="public-filesize" class="public-filesize">0 Bytes</div>
+          <button id="public-download-btn" onclick="downloadPublicFile()" class="btn btn-primary public-btn-download">
+            <i data-lucide="download" style="width:18px;height:18px;"></i> Download File
+          </button>
+        </div>
+
+        <div class="public-divider"></div>
+        <div class="public-footer">
+          Shared via TeleCloud · This link may expire.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD DRAWER -->
+  <div id="upload-panel" class="upload-panel">
+    <div class="upload-panel-header">
+      <h4 id="upload-panel-title">Uploading 1 file</h4>
+      <button class="btn-icon" onclick="dismissUploadPanel()" id="upload-dismiss-btn" disabled style="opacity: 0.5;">
+        <i data-lucide="x" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+    <div class="upload-panel-content">
+      <div class="upload-file-info">
+        <div class="item-icon icon-file-box" id="upload-file-icon">
+          <i data-lucide="file" style="width:18px;height:18px;"></i>
+        </div>
+        <div class="upload-file-details">
+          <div id="upload-filename" class="upload-filename">vacation-footage.mp4</div>
+          <div id="upload-filesize" class="upload-filesize">1.8 GB</div>
+        </div>
+      </div>
+      <div class="upload-bar-bg">
+        <div id="upload-bar-fill" class="upload-bar-fill"></div>
+      </div>
+      <div class="upload-progress-row">
+        <span id="upload-progress-text">Uploading... chunk 1 of 1</span>
+        <span id="upload-progress-percent" class="upload-progress-percent">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE FOLDER MODAL -->
+  <div id="create-folder-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>New Folder</h3>
+        <button onclick="closeModal('create-folder-modal')" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <form onsubmit="handleCreateFolderSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="new-folder-name">Folder Name</label>
+            <div class="input-wrapper">
+              <input type="text" id="new-folder-name" placeholder="Enter folder name" required maxlength="255">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" onclick="closeModal('create-folder-modal')" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Folder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RENAME MODAL -->
+  <div id="rename-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="rename-modal-title">Rename</h3>
+        <button onclick="closeModal('rename-modal')" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <form onsubmit="handleRenameSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="rename-item-name">New Name</label>
+            <div class="input-wrapper">
+              <input type="text" id="rename-item-name" placeholder="Enter new name" required maxlength="255">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" onclick="closeModal('rename-modal')" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Rename</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MOVE MODAL -->
+  <div id="move-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="move-modal-title">Move Item</h3>
+        <button onclick="closeModal('move-modal')" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <form onsubmit="handleMoveSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="move-destination-select">Choose Destination Folder</label>
+            <div class="input-wrapper">
+              <select id="move-destination-select" required>
+                <!-- Filled dynamically -->
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" onclick="closeModal('move-modal')" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Move</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SHARE CONFIG MODAL -->
+  <div id="share-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="modal-header">
+        <h3 id="share-modal-title">Share File</h3>
+        <button onclick="closeModal('share-modal')" class="btn-icon">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleCreateShare(event)">
+          <div class="form-group">
+            <label for="share-expires">Expiry Date & Time (Optional)</label>
+            <div class="input-wrapper">
+              <input type="datetime-local" id="share-expires">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="share-limit">Download Count Limit (Optional)</label>
+            <div class="input-wrapper">
+              <input type="number" id="share-limit" placeholder="Unlimited" min="1">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px;">
+            Create Share Link
+          </button>
+        </form>
+
+        <div id="active-shares-history" class="shares-list">
+          <div class="shares-list-title">Active Share Links</div>
+          <div id="active-shares-list-container">
+            <!-- Dynamically populated shares list -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('share-modal')" class="btn btn-outline">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Config Base API URL
+    const API_BASE = "http://127.0.0.1:8000";
+
+    // Application State
+    let token = localStorage.getItem("access_token") || null;
+    let refreshToken = localStorage.getItem("refresh_token") || null;
+    let currentUser = null;
+    
+    // Directory navigation state
+    let currentFolderId = null;
+    let folderContents = { folders: [], files: [] };
+    let navigationHistory = []; // list of { id, name }
+    let allWorkspaceFolders = []; // Flat list of all folders for move dropdowns and sidebar
+    
+    // Storage estimation state
+    let estimatedStorageUsed = 0;
+    
+    // Modal context
+    let activeModalItem = null; // { type: 'file'|'folder', id: UUID, name: String }
+    let activeUploadXhr = null;
+
+    // Email pending Supabase confirmation (used by the Resend button)
+    let pendingVerificationEmail = localStorage.getItem("pending_verification_email") || null;
+
+    // --- Rendering helpers (performance) ---------------------------------------
+
+    // Render <i data-lucide> icons inside `root` ONLY. lucide.createIcons() scans
+    // the entire document by default; running that after every small UI update is
+    // the bulk of our long tasks. The UMD build accepts a `root` option, so we
+    // scope each pass to just the container that changed. Already-rendered icons
+    // (now <svg>, no longer carrying data-lucide) are skipped automatically.
+    function renderIcons(root) {
+      if (!window.lucide || typeof lucide.createIcons !== 'function') return;
+      try {
+        if (root && root !== document && root.querySelectorAll) {
+          lucide.createIcons({ root });
+        } else {
+          lucide.createIcons();
+        }
+      } catch (e) {
+        // Older/edge builds without the `root` option — fall back to a global pass.
+        try { lucide.createIcons(); } catch (_) {}
+      }
+    }
+
+    // Keyed list reconciliation. Patches `container`'s children in place to match
+    // `desired` instead of wiping + rebuilding via innerHTML. Each desired entry:
+    //   { key, sig, html, tag?, className? }
+    // - key: stable identity (e.g. 'file:<uuid>') — survives across renders.
+    // - sig: cheap content fingerprint; element is only re-rendered when it changes.
+    // Unchanged rows are left untouched, so scroll position, :hover state, and CSS
+    // transitions are preserved across polls/updates. Icons are rendered scoped to
+    // each freshly built/updated element only.
+    function reconcileList(container, desired) {
+      const existing = new Map();
+      for (const el of Array.from(container.children)) {
+        if (el.dataset && el.dataset.key) existing.set(el.dataset.key, el);
+      }
+
+      const desiredKeys = new Set(desired.map(d => d.key));
+      existing.forEach((el, key) => {
+        if (!desiredKeys.has(key)) { el.remove(); existing.delete(key); }
+      });
+
+      let prev = null;
+      for (const d of desired) {
+        let el = existing.get(d.key);
+        if (!el) {
+          el = document.createElement(d.tag || 'div');
+          el.dataset.key = d.key;
+          if (d.className !== undefined) el.className = d.className;
+          el.innerHTML = d.html;
+          el.dataset.sig = d.sig;
+          renderIcons(el);
+        } else if (el.dataset.sig !== d.sig) {
+          if (d.className !== undefined && el.className !== d.className) el.className = d.className;
+          el.innerHTML = d.html;
+          el.dataset.sig = d.sig;
+          renderIcons(el);
+        }
+        // Place in correct order with minimal DOM moves.
+        const ref = prev ? prev.nextSibling : container.firstChild;
+        if (ref !== el) container.insertBefore(el, ref);
+        prev = el;
+      }
+    }
+
+    // Toast triggers
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'error' ? 'toast-error' : 'toast-success'}`;
+      
+      const iconName = type === 'error' ? 'alert-circle' : 'check-circle';
+      
+      toast.innerHTML = `
+        <i data-lucide="${iconName}" style="width:18px;height:18px;color:${type === 'error' ? 'var(--destructive)' : '#16a34a'}"></i>
+        <div class="toast-message">${escapeHtml(message)}</div>
+        <i data-lucide="x" class="toast-close" onclick="this.parentElement.remove()"></i>
+      `;
+      
+      container.appendChild(toast);
+      renderIcons(toast);
+      
+      // Auto dismiss
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.animation = 'fadeIn 0.2s reverse ease';
+          setTimeout(() => toast.remove(), 200);
+        }
+      }, 5000);
+    }
+
+    // Toggle Password Visibility
+    function togglePasswordVisibility(id) {
+      const input = document.getElementById(id);
+      const eye = document.getElementById(`${id}-eye`);
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        eye.setAttribute('data-lucide', 'eye');
+      }
+      renderIcons(eye.closest('.input-wrapper') || document);
+    }
+
+    // Switch Login/Signup tabs
+    let currentAuthTab = 'login';
+    function switchAuthTab(tab) {
+      currentAuthTab = tab;
+      const loginTab = document.getElementById('tab-login');
+      const signupTab = document.getElementById('tab-signup');
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const note = document.getElementById('auth-switch-note');
+      
+      if (tab === 'login') {
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+        submitBtn.textContent = 'Log in';
+        note.innerHTML = `Don't have an account? <a href="#" onclick="switchAuthTab('signup'); return false;">Sign up.</a>`;
+      } else {
+        loginTab.classList.remove('active');
+        signupTab.classList.add('active');
+        submitBtn.textContent = 'Sign up';
+        note.innerHTML = `Already have an account? <a href="#" onclick="switchAuthTab('login'); return false;">Log in.</a>`;
+      }
+      
+      document.getElementById('auth-form-el').reset();
+    }
+
+    // Modal Control
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Custom close logic to allow cleanup
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      activeModalItem = null;
+    }
+
+    // Handle authentication API calls
+    async function handleAuthSubmit(event) {
+      event.preventDefault();
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      
+      const submitBtn = document.getElementById('auth-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-top-color:#fff;"></div>`;
+
+      const path = currentAuthTab === 'login' ? '/auth/login' : '/auth/signup';
+      const body = { email, password };
+      
+      try {
+        const res = await fetch(`${API_BASE}${path}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Authentication failed.');
+        }
+
+        if (currentAuthTab === 'signup') {
+          // Supabase email confirmation is enabled: signup issues NO session.
+          // Supabase sends the confirmation email; show the "check your inbox"
+          // screen and remember the address for the Resend button.
+          pendingVerificationEmail = data.email || email;
+          localStorage.setItem("pending_verification_email", pendingVerificationEmail);
+          showToast(data.message || "Check your email for a verification link.");
+          transitionToView('verify-view');
+        } else {
+          // Login returns a real session.
+          token = data.access_token;
+          refreshToken = data.refresh_token;
+          localStorage.setItem("access_token", token);
+          localStorage.setItem("refresh_token", refreshToken);
+          currentUser = data.user;
+          await initializeApp();
+        }
+      } catch (err) {
+        // Supabase rejects login until the email is confirmed.
+        if (/not confirmed|not verified|confirm your email/i.test(err.message)) {
+          pendingVerificationEmail = email;
+          localStorage.setItem("pending_verification_email", email);
+          showToast("Please verify your email first. Check your inbox.", 'error');
+          transitionToView('verify-view');
+        } else {
+          showToast(err.message, 'error');
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = currentAuthTab === 'login' ? 'Log in' : 'Sign up';
+      }
+    }
+
+    // Resend Supabase email-confirmation link (unauthenticated, by email)
+    async function resendVerificationEmail() {
+      const targetEmail = pendingVerificationEmail || currentUser?.email;
+      if (!targetEmail) {
+        showToast("Enter your email on the login screen first.", 'error');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/auth/resend-confirmation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: targetEmail })
+        });
+
+        if (res.status === 202) {
+          showToast("Verification email sent. Check your inbox.");
+        } else {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error?.message || 'Could not send verification email.');
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Enter Dashboard as unverified user (bypass verify screen)
+    function enterDashboardUnverified() {
+      transitionToView('dashboard-view');
+      loadDashboard();
+    }
+
+    // Handle the Supabase email-confirmation redirect. After the user clicks the
+    // link in Supabase's email, Supabase verifies it and redirects back here with
+    // the session tokens in the URL fragment:
+    //   #access_token=...&refresh_token=...&type=signup
+    // (or an #error_description=... on failure).
+    async function handleSupabaseRedirect(hash) {
+      const params = new URLSearchParams(hash.replace(/^#/, ''));
+      const err = params.get('error_description') || params.get('error');
+      const accessToken = params.get('access_token');
+
+      // Strip the fragment so the tokens don't linger in the address bar/history.
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      if (err || !accessToken) {
+        transitionToView('confirm-view');
+        document.getElementById('confirm-icon-box').innerHTML = `<i data-lucide="alert-triangle" style="width:32px;height:32px;color:var(--destructive)"></i>`;
+        document.getElementById('confirm-icon-box').style.backgroundColor = '#fee2e2';
+        document.getElementById('confirm-title').textContent = "Verification Failed";
+        document.getElementById('confirm-description').textContent =
+          err ? decodeURIComponent(err.replace(/\+/g, ' ')) : "This confirmation link is invalid or has expired.";
+        document.getElementById('confirm-action-btn').textContent = "Back to Log in";
+        document.getElementById('confirm-action-btn').style.display = 'block';
+        renderIcons(document.getElementById('confirm-view'));
+        return;
+      }
+
+      // Success: Supabase confirmed the email and handed us a live session.
+      token = accessToken;
+      refreshToken = params.get('refresh_token');
+      localStorage.setItem("access_token", token);
+      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
+      localStorage.removeItem("pending_verification_email");
+      pendingVerificationEmail = null;
+
+      try {
+        currentUser = await fetchProfile();
+        showToast("Email verified! Your account is now fully active.");
+        transitionToView('dashboard-view');
+        loadDashboard();
+      } catch (e) {
+        transitionToView('auth-view');
+        showToast("Email verified. Please log in to continue.");
+      }
+    }
+
+    function goToLogin() {
+      // Clear current state and bounce to auth
+      handleLogout();
+    }
+
+    // Logout
+    async function handleLogout() {
+      try {
+        if (token) {
+          await fetch(`${API_BASE}/auth/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ refresh_token: refreshToken })
+          });
+        }
+      } catch (e) {
+        console.error("Stateless logout fallback executed", e);
+      }
+      
+      token = null;
+      refreshToken = null;
+      currentUser = null;
+      currentFolderId = null;
+      navigationHistory = [];
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      
+      // Clean verify URL parameter if any on logout
+      if (window.location.search) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      transitionToView('auth-view');
+      switchAuthTab('login');
+    }
+
+    // Initialize application logic
+    async function initializeApp() {
+      // Parse query/hash routing
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParams = window.location.hash;
+      
+      const shareToken = urlParams.get('s') || (hashParams.startsWith('#/s/') ? hashParams.substring(4) : null);
+      // Supabase confirmation redirect arrives with tokens (or an error) in the
+      // URL fragment — distinct from our own '#/s/' share routing.
+      const isSupabaseRedirect = !hashParams.startsWith('#/s/') &&
+        /(access_token|error_description|error)=/.test(hashParams);
+
+      if (shareToken) {
+        // Show public share page
+        transitionToView('public-view');
+        loadPublicFileDetails(shareToken);
+        return;
+      }
+
+      if (isSupabaseRedirect) {
+        await handleSupabaseRedirect(hashParams);
+        return;
+      }
+
+      if (token) {
+        // Fetch current profile to confirm active session
+        try {
+          const profile = await fetchProfile();
+          currentUser = profile;
+          
+          if (!profile.email_verified) {
+            transitionToView('verify-view');
+          } else {
+            transitionToView('dashboard-view');
+            loadDashboard();
+          }
+        } catch (err) {
+          // Token is invalid/expired
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          token = null;
+          refreshToken = null;
+          transitionToView('auth-view');
+          showToast("Session expired. Please log in again.", 'error');
+        }
+      } else {
+        transitionToView('auth-view');
+      }
+    }
+
+    // Transition between view elements
+    function transitionToView(viewId) {
+      document.querySelectorAll('.view-container').forEach(view => {
+        view.classList.remove('active');
+      });
+      const view = document.getElementById(viewId);
+      view.classList.add('active');
+      renderIcons(view);
+    }
+
+    // Fetch caller's profile
+    async function fetchProfile() {
+      const res = await fetch(`${API_BASE}/users/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.status === 401) {
+        handleLogout();
+        throw new Error("Unauthorized");
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'Could not fetch profile details.');
+      return data;
+    }
+
+    // Walk the entire folder tree, fetching SIBLINGS IN PARALLEL at each depth
+    // (breadth-first via Promise.all) instead of awaiting one folder at a time.
+    // A subtree of N folders now resolves in ~tree-height round-trips instead of N
+    // sequential ones. Returns the flat folder list and the aggregated byte total
+    // in a single pass, so quota + the move-dropdown list can share one traversal.
+    //
+    // NOTE: ideally the backend would expose a single tree endpoint with
+    // server-aggregated sizes to make this O(1) requests; until then this keeps
+    // the client from blocking the main thread on a long chain of awaits.
+    async function fetchFolderTree() {
+      const flat = [];
+      let totalBytes = 0;
+
+      async function visit(folderId, depth, pathPrefix) {
+        const path = folderId ? `/folders/${folderId}` : `/folders`;
+        const res = await fetch(`${API_BASE}${path}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.files) {
+          for (const f of data.files) totalBytes += f.size_bytes;
+        }
+
+        const subs = data.folders || [];
+        // Record children in order, then fetch their subtrees concurrently.
+        const pending = subs.map(sub => {
+          const displayPath = pathPrefix ? `${pathPrefix} / ${sub.name}` : sub.name;
+          flat.push({ id: sub.id, name: sub.name, path: displayPath, depth });
+          return visit(sub.id, depth + 1, displayPath);
+        });
+        await Promise.all(pending);
+      }
+
+      await visit(null, 0, "");
+      // Concurrency interleaves branches; sort by path to restore a stable,
+      // tree-pre-order listing (a child's path is prefixed by its parent's).
+      flat.sort((a, b) => a.path.localeCompare(b.path));
+      return { folders: flat, totalBytes };
+    }
+
+    // Quota estimation — single parallel tree scan.
+    async function calculateQuotaRecursively() {
+      try {
+        const { totalBytes } = await fetchFolderTree();
+        estimatedStorageUsed = totalBytes;
+      } catch (err) {
+        console.error("Quota traversal error", err);
+        estimatedStorageUsed = 0;
+      }
+      updateQuotaUI();
+    }
+
+    // Update Sidebar Quota Progress Bar
+    function updateQuotaUI() {
+      const percentageText = document.getElementById('quota-percentage');
+      const barFill = document.getElementById('quota-bar-fill');
+      const text = document.getElementById('quota-text');
+      
+      const formattedUsed = formatBytes(estimatedStorageUsed);
+      
+      if (currentUser?.email_verified) {
+        percentageText.textContent = "—";
+        barFill.style.width = "30%"; // Arbitrary bar fill matching Reference Image 2 visual balance for Unlimited storage
+        text.innerHTML = `<i data-lucide="database" style="width:12px;height:12px;"></i> ${formattedUsed} used — Unlimited`;
+      } else {
+        const limitBytes = 500 * 1024 * 1024; // 500 MiB limit
+        const pct = Math.min(Math.round((estimatedStorageUsed / limitBytes) * 100), 100);
+        percentageText.textContent = `${pct}%`;
+        barFill.style.width = `${pct}%`;
+        text.innerHTML = `<i data-lucide="database" style="width:12px;height:12px;"></i> ${formattedUsed} / 500 MB`;
+      }
+      renderIcons(text);
+    }
+
+    // Load full folder list flat to make select dropdowns (for move folder modal).
+    async function loadAllWorkspaceFolders() {
+      try {
+        const { folders } = await fetchFolderTree();
+        allWorkspaceFolders = folders;
+      } catch (err) {
+        console.error("Workspace folders fetch error", err);
+        allWorkspaceFolders = [];
+      }
+    }
+
+    // Populate Sidebar collapsible folder list (keyed-patched, not wiped).
+    async function populateSidebarFolders() {
+      const container = document.getElementById('sidebar-subfolders');
+
+      // Fetch root subfolders
+      try {
+        const res = await fetch(`${API_BASE}/folders`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const desired = (data.folders || []).map(sub => {
+          const isActive = currentFolderId === sub.id;
+          return {
+            key: sub.id,
+            // active state is part of the fingerprint so only the folder whose
+            // selection changed gets re-rendered on navigation.
+            sig: `${sub.name}|${isActive ? 1 : 0}`,
+            className: 'tree-node',
+            html: `
+              <a href="#" class="tree-item ${isActive ? 'active' : ''}" onclick="navigateToFolder('${sub.id}', event)">
+                <i data-lucide="folder" style="width:16px;height:16px;"></i> ${escapeHtml(sub.name)}
+              </a>
+            `
+          };
+        });
+
+        reconcileList(container, desired);
+      } catch (e) {
+        console.error("Sidebar update failed", e);
+      }
+    }
+
+    // Load Dashboard Details
+    async function loadDashboard() {
+      // Set User header/sidebar data
+      document.getElementById('user-email').textContent = currentUser.email;
+      
+      const badge = document.getElementById('user-verified-badge');
+      const banner = document.getElementById('unverified-banner');
+      
+      if (currentUser.email_verified) {
+        badge.textContent = "Verified";
+        badge.className = "user-badge";
+        banner.style.display = "none";
+      } else {
+        badge.textContent = "Unverified";
+        badge.className = "user-badge unverified";
+        banner.style.display = "flex";
+      }
+      
+      // Load current folder list (renders the table immediately).
+      await fetchCurrentFolderContents();
+
+      // Sidebar (cheap, single root request) — fire concurrently.
+      populateSidebarFolders();
+
+      // Quota + the move-dropdown folder list both need the whole tree; do ONE
+      // parallel scan in the background and feed both, instead of two scans.
+      fetchFolderTree()
+        .then(({ folders, totalBytes }) => {
+          allWorkspaceFolders = folders;
+          estimatedStorageUsed = totalBytes;
+          updateQuotaUI();
+        })
+        .catch(err => console.error("Workspace tree scan failed", err));
+    }
+
+    // Fetch and render current folder subdirectories and files
+    async function fetchCurrentFolderContents() {
+      const path = currentFolderId ? `/folders/${currentFolderId}` : `/folders`;
+      
+      try {
+        const res = await fetch(`${API_BASE}${path}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.status === 401) {
+          handleLogout();
+          return;
+        }
+        
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Could not fetch directory contents.');
+        }
+        
+        folderContents = data;
+        renderFilesTable();
+        renderBreadcrumbs();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Navigate to folder
+    function navigateToFolder(folderId, event) {
+      if (event) event.preventDefault();
+      
+      // Manage folder tree selection
+      const treeRoot = document.getElementById('tree-root-item');
+      if (folderId === null) {
+        treeRoot.classList.add('active');
+        navigationHistory = [];
+      } else {
+        treeRoot.classList.remove('active');
+      }
+      
+      currentFolderId = folderId;
+      fetchCurrentFolderContents();
+      populateSidebarFolders();
+    }
+
+    // Render breadcrumbs
+    function renderBreadcrumbs() {
+      const breadcrumbs = document.getElementById('breadcrumbs');
+      breadcrumbs.innerHTML = '';
+      
+      // Root element
+      const rootLink = document.createElement('a');
+      rootLink.className = `breadcrumb-item ${currentFolderId === null ? 'active' : ''}`;
+      rootLink.textContent = "My Files";
+      rootLink.href = "#";
+      rootLink.onclick = (e) => navigateToFolder(null, e);
+      breadcrumbs.appendChild(rootLink);
+      
+      if (currentFolderId !== null) {
+        const histIndex = navigationHistory.findIndex(h => h.id === currentFolderId);
+        
+        if (histIndex !== -1) {
+          // Truncate list up to active folder
+          navigationHistory = navigationHistory.slice(0, histIndex + 1);
+        } else {
+          let folderName = "Folder";
+          const found = allWorkspaceFolders.find(f => f.id === currentFolderId);
+          if (found) {
+            folderName = found.name;
+          }
+          navigationHistory.push({ id: currentFolderId, name: folderName });
+        }
+        
+        // Render history list
+        navigationHistory.forEach((h, index) => {
+          const sep = document.createElement('span');
+          sep.className = 'breadcrumb-separator';
+          sep.textContent = '/';
+          breadcrumbs.appendChild(sep);
+          
+          const item = document.createElement('span');
+          const isLast = index === navigationHistory.length - 1;
+          
+          if (isLast) {
+            item.className = 'breadcrumb-item active';
+            item.textContent = h.name;
+          } else {
+            const link = document.createElement('a');
+            link.className = 'breadcrumb-item';
+            link.textContent = h.name;
+            link.href = '#';
+            link.onclick = (e) => navigateToFolder(h.id, e);
+            item.appendChild(link);
+          }
+          breadcrumbs.appendChild(item);
+        });
+      }
+    }
+
+    // Build the inner <td> markup for a folder row.
+    function buildFolderRowHtml(folder) {
+      const safeName = escapeHtml(folder.name);
+      return `
+          <td>
+            <a href="#" class="name-cell" onclick="handleFolderClick('${folder.id}', '${safeName}', event)">
+              <div class="item-icon icon-folder-box">
+                <i data-lucide="folder" style="width:16px;height:16px;"></i>
+              </div>
+              <span>${safeName}</span>
+            </a>
+          </td>
+          <td>—</td>
+          <td>${formatDate(folder.created_at)}</td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-icon" title="Rename" onclick="openRenameModal('folder', '${folder.id}', '${safeName}')">
+                <i data-lucide="edit-2" style="width:16px;height:16px;"></i>
+              </button>
+              <button class="btn-icon" title="Move" onclick="openMoveModal('folder', '${folder.id}', '${safeName}')">
+                <i data-lucide="folder-input" style="width:16px;height:16px;"></i>
+              </button>
+              <button class="btn-icon danger-hover" title="Delete" onclick="deleteFolderPrompt('${folder.id}')">
+                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+              </button>
+            </div>
+          </td>
+        `;
+    }
+
+    // Build the inner <td> markup for a file row.
+    function buildFileRowHtml(file) {
+      const safeName = escapeHtml(file.name);
+      const fileIcon = getFileIconName(file.name, file.mime_type);
+      const iconClass = getFileIconClass(file.name, file.mime_type);
+      return `
+          <td>
+            <div class="name-cell file-node">
+              <div class="item-icon ${iconClass}">
+                <i data-lucide="${fileIcon}" style="width:16px;height:16px;"></i>
+              </div>
+              <span>${safeName}</span>
+            </div>
+          </td>
+          <td>${formatBytes(file.size_bytes)}</td>
+          <td>${formatDate(file.created_at)}</td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-icon" title="Download" onclick="downloadFile('${file.id}')">
+                <i data-lucide="download" style="width:16px;height:16px;"></i>
+              </button>
+              <button class="btn-icon" title="Share" onclick="openShareModal('${file.id}', '${safeName}')">
+                <i data-lucide="link-2" style="width:16px;height:16px;"></i>
+              </button>
+              <button class="btn-icon" title="Rename" onclick="openRenameModal('file', '${file.id}', '${safeName}')">
+                <i data-lucide="edit-2" style="width:16px;height:16px;"></i>
+              </button>
+              <button class="btn-icon" title="Move" onclick="openMoveModal('file', '${file.id}', '${safeName}')">
+                <i data-lucide="folder-input" style="width:16px;height:16px;"></i>
+              </button>
+              <button class="btn-icon danger-hover" title="Delete" onclick="deleteFilePrompt('${file.id}')">
+                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+              </button>
+            </div>
+          </td>
+        `;
+    }
+
+    // Render Files Table — keyed-patched so rows that didn't change are left in
+    // the DOM untouched (scroll position, :hover, and transitions survive updates).
+    function renderFilesTable() {
+      const tbody = document.getElementById('files-table-body');
+      const emptyState = document.getElementById('empty-state');
+      const tableContainer = document.querySelector('.table-container');
+
+      // Sort subfolders alphabetically, then files alphabetically
+      const sortedFolders = [...(folderContents.folders || [])].sort((a, b) => a.name.localeCompare(b.name));
+      const sortedFiles = [...(folderContents.files || [])].sort((a, b) => a.name.localeCompare(b.name));
+
+      if (!sortedFolders.length && !sortedFiles.length) {
+        emptyState.style.display = 'flex';
+        tableContainer.style.display = 'none';
+        tbody.replaceChildren();
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      tableContainer.style.display = 'block';
+
+      const desired = [];
+      sortedFolders.forEach(folder => desired.push({
+        key: `folder:${folder.id}`,
+        sig: `${folder.name}|${folder.created_at}`,
+        tag: 'tr',
+        html: buildFolderRowHtml(folder)
+      }));
+      sortedFiles.forEach(file => desired.push({
+        key: `file:${file.id}`,
+        sig: `${file.name}|${file.size_bytes}|${file.created_at}`,
+        tag: 'tr',
+        html: buildFileRowHtml(file)
+      }));
+
+      reconcileList(tbody, desired);
+    }
+
+    // Folder navigation click handler
+    function handleFolderClick(folderId, folderName, event) {
+      event.preventDefault();
+      navigationHistory.push({ id: folderId, name: folderName });
+      navigateToFolder(folderId);
+    }
+
+    // Download File
+    function downloadFile(fileId) {
+      const url = `${API_BASE}/files/${fileId}`;
+      showToast("Preparing download...");
+      
+      fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error?.message || "Failed to download file.");
+        }
+        
+        let filename = 'download';
+        const cdHeader = res.headers.get('content-disposition');
+        if (cdHeader) {
+          filename = getFilenameFromContentDisposition(cdHeader);
+        }
+        
+        return res.blob().then(blob => ({ blob, filename }));
+      })
+      .then(({ blob, filename }) => {
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        a.remove();
+        showToast("Download started.");
+      })
+      .catch(err => {
+        showToast(err.message, 'error');
+      });
+    }
+
+    // Modal forms operations: CREATE FOLDER
+    function openCreateFolderModal() {
+      document.getElementById('new-folder-name').value = '';
+      openModal('create-folder-modal');
+    }
+
+    async function handleCreateFolderSubmit(event) {
+      event.preventDefault();
+      const folderName = document.getElementById('new-folder-name').value.trim();
+      
+      if (!folderName) return;
+      
+      try {
+        const res = await fetch(`${API_BASE}/folders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: folderName,
+            parent_id: currentFolderId
+          })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Failed to create folder.');
+        }
+        
+        showToast(`Folder "${folderName}" created successfully.`);
+        closeModal('create-folder-modal');
+        fetchCurrentFolderContents();
+        populateSidebarFolders();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // RENAME ITEM (File or Folder)
+    function openRenameModal(type, id, currentName) {
+      activeModalItem = { type, id, name: currentName };
+      document.getElementById('rename-modal-title').textContent = `Rename ${type === 'folder' ? 'Folder' : 'File'}`;
+      document.getElementById('rename-item-name').value = currentName;
+      openModal('rename-modal');
+    }
+
+    async function handleRenameSubmit(event) {
+      event.preventDefault();
+      if (!activeModalItem) return;
+      
+      const newName = document.getElementById('rename-item-name').value.trim();
+      if (!newName || newName === activeModalItem.name) {
+        closeModal('rename-modal');
+        return;
+      }
+      
+      const path = activeModalItem.type === 'folder' 
+        ? `/folders/${activeModalItem.id}` 
+        : `/files/${activeModalItem.id}`;
+        
+      try {
+        const res = await fetch(`${API_BASE}${path}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name: newName })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Failed to rename item.');
+        }
+        
+        showToast("Item renamed successfully.");
+        closeModal('rename-modal');
+        fetchCurrentFolderContents();
+        populateSidebarFolders();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // DELETE ITEM PROMPTS
+    async function deleteFilePrompt(fileId) {
+      if (confirm("Are you sure you want to delete this file? This action is irreversible.")) {
+        try {
+          const res = await fetch(`${API_BASE}/files/${fileId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (res.status === 204) {
+            showToast("File soft-deleted. Space will reclaim shortly.");
+            fetchCurrentFolderContents();
+            calculateQuotaRecursively();
+          } else {
+            const data = await res.json();
+            throw new Error(data.error?.message || 'Failed to delete file.');
+          }
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      }
+    }
+
+    async function deleteFolderPrompt(folderId) {
+      if (confirm("Are you sure you want to delete this folder? ALL contents inside it (subfolders and files) will be deleted!")) {
+        try {
+          const res = await fetch(`${API_BASE}/folders/${folderId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (res.status === 204) {
+            showToast("Folder deleted successfully.");
+            fetchCurrentFolderContents();
+            calculateQuotaRecursively();
+            populateSidebarFolders();
+          } else {
+            const data = await res.json();
+            throw new Error(data.error?.message || 'Failed to delete folder.');
+          }
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      }
+    }
+
+    // MOVE ITEM MODAL (Files/Folders reparenting)
+    async function openMoveModal(type, id, name) {
+      activeModalItem = { type, id, name };
+      
+      const select = document.getElementById('move-destination-select');
+      select.innerHTML = '';
+      
+      // Root option
+      const rootOpt = document.createElement('option');
+      rootOpt.value = 'root';
+      rootOpt.textContent = 'My Files (Root)';
+      select.appendChild(rootOpt);
+      
+      // Fetch flat folders list
+      await loadAllWorkspaceFolders();
+      
+      // Populate select list, excluding current folder/file descendants to prevent loops
+      allWorkspaceFolders.forEach(f => {
+        if (type === 'folder' && (f.id === id || f.path.startsWith(name + ' /') || f.path === name)) {
+          return;
+        }
+        
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        opt.textContent = `${'  '.repeat(f.depth)}└─ ${f.name}`;
+        select.appendChild(opt);
+      });
+      
+      openModal('move-modal');
+    }
+
+    async function handleMoveSubmit(event) {
+      event.preventDefault();
+      if (!activeModalItem) return;
+      
+      const destSelect = document.getElementById('move-destination-select').value;
+      const destinationFolderId = destSelect === 'root' ? null : destSelect;
+      
+      let path = '';
+      let body = {};
+      
+      if (activeModalItem.type === 'folder') {
+        path = `/folders/${activeModalItem.id}/move`;
+        body = { new_parent_id: destinationFolderId };
+      } else {
+        path = `/files/${activeModalItem.id}/move`;
+        body = { folder_id: destinationFolderId };
+      }
+      
+      try {
+        const res = await fetch(`${API_BASE}${path}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(body)
+        });
+        
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Failed to move item.');
+        }
+        
+        showToast("Item moved successfully.");
+        closeModal('move-modal');
+        fetchCurrentFolderContents();
+        populateSidebarFolders();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // UPLOADING FILES VIA CHUNKS (progress aware XHR)
+    function triggerUpload() {
+      document.getElementById('file-uploader').click();
+    }
+
+    function handleFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Client-side block for unverified users
+      if (!currentUser.email_verified && file.size > 30 * 1024 * 1024) {
+        showToast("Unverified users cannot upload files larger than 30 MB. Please verify your email.", "error");
+        event.target.value = '';
+        return;
+      }
+      
+      // Toggle upload progress drawer UI
+      const panel = document.getElementById('upload-panel');
+      const filenameLabel = document.getElementById('upload-filename');
+      const filesizeLabel = document.getElementById('upload-filesize');
+      const progressBar = document.getElementById('upload-bar-fill');
+      const progressText = document.getElementById('upload-progress-text');
+      const progressPct = document.getElementById('upload-progress-percent');
+      
+      filenameLabel.textContent = file.name;
+      filesizeLabel.textContent = formatBytes(file.size);
+      progressBar.style.width = '0%';
+      progressPct.textContent = '0%';
+      
+      const chunkSize = 18 * 1024 * 1024;
+      const totalChunks = Math.ceil(file.size / chunkSize) || 1;
+      
+      progressText.textContent = `Uploading... chunk 1 of ${totalChunks}`;
+      
+      panel.classList.add('active');
+      document.getElementById('dimmed-overlay').classList.add('active');
+      document.getElementById('upload-dismiss-btn').disabled = true;
+      document.getElementById('upload-dismiss-btn').style.opacity = 0.5;
+      
+      const folderParam = currentFolderId ? `&folder_id=${currentFolderId}` : '';
+      const url = `${API_BASE}/files?name=${encodeURIComponent(file.name)}${folderParam}`;
+      
+      const xhr = new XMLHttpRequest();
+      activeUploadXhr = xhr;
+      
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      
+      xhr.upload.onprogress = (evt) => {
+        if (evt.lengthComputable) {
+          const percent = Math.round((evt.loaded / evt.total) * 100);
+          progressBar.style.width = `${percent}%`;
+          progressPct.textContent = `${percent}%`;
+          
+          const currentChunkIdx = Math.min(Math.floor(evt.loaded / chunkSize) + 1, totalChunks);
+          progressText.textContent = `Uploading... chunk ${currentChunkIdx} of ${totalChunks}`;
+        }
+      };
+      
+      xhr.onload = () => {
+        activeUploadXhr = null;
+        document.getElementById('dimmed-overlay').classList.remove('active');
+        
+        if (xhr.status === 201) {
+          progressBar.style.width = '100%';
+          progressPct.textContent = '100%';
+          progressText.textContent = 'Committed successfully.';
+          showToast(`File "${file.name}" uploaded successfully.`);
+          
+          const dismissBtn = document.getElementById('upload-dismiss-btn');
+          dismissBtn.disabled = false;
+          dismissBtn.style.opacity = 1.0;
+          
+          fetchCurrentFolderContents();
+          calculateQuotaRecursively();
+        } else {
+          let errMsg = 'Failed to upload file.';
+          try {
+            const errEnvelope = JSON.parse(xhr.responseText);
+            errMsg = errEnvelope.error?.message || errMsg;
+          } catch(e) {}
+          
+          showToast(errMsg, 'error');
+          progressText.textContent = 'Upload failed.';
+          
+          const dismissBtn = document.getElementById('upload-dismiss-btn');
+          dismissBtn.disabled = false;
+          dismissBtn.style.opacity = 1.0;
+        }
+        
+        event.target.value = '';
+      };
+      
+      xhr.onerror = () => {
+        activeUploadXhr = null;
+        document.getElementById('dimmed-overlay').classList.remove('active');
+        showToast("Network error occurred during upload.", "error");
+        progressText.textContent = 'Upload failed.';
+        
+        const dismissBtn = document.getElementById('upload-dismiss-btn');
+        dismissBtn.disabled = false;
+        dismissBtn.style.opacity = 1.0;
+        
+        event.target.value = '';
+      };
+      
+      xhr.send(file);
+    }
+
+    function dismissUploadPanel() {
+      document.getElementById('upload-panel').classList.remove('active');
+    }
+
+    // SHARE MODAL MANAGEMENT
+    async function openShareModal(fileId, filename) {
+      activeModalItem = { type: 'file', id: fileId, name: filename };
+      document.getElementById('share-modal-title').textContent = `Share: ${filename}`;
+      
+      document.getElementById('share-expires').value = '';
+      document.getElementById('share-limit').value = '';
+      
+      await fetchFileShares(fileId);
+      
+      openModal('share-modal');
+    }
+
+    async function fetchFileShares(fileId) {
+      const container = document.getElementById('active-shares-list-container');
+      container.innerHTML = `<p style="color:var(--text-subdued);font-size:12px;">Loading shares...</p>`;
+      
+      try {
+        const res = await fetch(`${API_BASE}/shares?file_id=${fileId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Failed to load share history.');
+        }
+        
+        container.innerHTML = '';
+        
+        const activeShares = (data.shares || []).filter(s => !s.revoked);
+        
+        if (activeShares.length === 0) {
+          container.innerHTML = `<p style="color:var(--text-subdued);font-size:12px;">No active public share links.</p>`;
+          return;
+        }
+        
+        activeShares.forEach(share => {
+          const item = document.createElement('div');
+          item.className = 'share-history-item';
+          
+          const origin = window.location.origin + window.location.pathname;
+          const shareUrl = `${origin}?s=${share.token}`;
+          
+          const expiryText = share.expires_at ? `Expires: ${formatDate(share.expires_at)}` : 'Never expires';
+          const limitText = share.download_limit ? `Limit: ${share.download_count}/${share.download_limit} downloads` : `Downloads: ${share.download_count}`;
+          
+          item.innerHTML = `
+            <div class="share-history-info">
+              <span class="share-history-url">${shareUrl}</span>
+              <span>${expiryText} · ${limitText}</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn-icon" title="Copy Link" onclick="copyToClipboard('${shareUrl}')">
+                <i data-lucide="copy" style="width:14px;height:14px;"></i>
+              </button>
+              <button class="btn-icon danger-hover" title="Revoke Share" onclick="revokeShare('${share.id}', '${fileId}')">
+                <i data-lucide="slash" style="width:14px;height:14px;"></i>
+              </button>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+
+        renderIcons(container);
+      } catch (err) {
+        container.innerHTML = `<p style="color:var(--destructive);font-size:12px;">${err.message}</p>`;
+      }
+    }
+
+    async function handleCreateShare(event) {
+      event.preventDefault();
+      if (!activeModalItem) return;
+      
+      const expiresInput = document.getElementById('share-expires').value;
+      const limitInput = document.getElementById('share-limit').value;
+      
+      const payload = {
+        file_id: activeModalItem.id
+      };
+      
+      if (expiresInput) {
+        payload.expires_at = new Date(expiresInput).toISOString();
+      }
+      
+      if (limitInput) {
+        payload.download_limit = parseInt(limitInput, 10);
+      }
+      
+      try {
+        const res = await fetch(`${API_BASE}/shares`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Failed to create share link.');
+        }
+        
+        showToast("Public share link created successfully!");
+        fetchFileShares(activeModalItem.id);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function revokeShare(shareId, fileId) {
+      if (confirm("Revoke this public share? Anyone with the link will lose download access immediately.")) {
+        try {
+          const res = await fetch(`${API_BASE}/shares/${shareId}/revoke`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error?.message || 'Failed to revoke share link.');
+          }
+          
+          showToast("Share link revoked.");
+          fetchFileShares(fileId);
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      }
+    }
+
+    // PUBLIC FILE PREVIEW & DOWNLOAD (Range metadata check)
+    let publicShareToken = null;
+    let publicFileDetails = null;
+
+    function loadPublicFileDetails(shareToken) {
+      publicShareToken = shareToken;
+      
+      const loading = document.getElementById('public-loading');
+      const errorDiv = document.getElementById('public-error');
+      const content = document.getElementById('public-content');
+      
+      loading.style.display = 'block';
+      errorDiv.style.display = 'none';
+      content.style.display = 'none';
+      
+      const fileUrl = `${API_BASE}/s/${shareToken}`;
+      
+      fetch(fileUrl, {
+        headers: { 'Range': 'bytes=0-0' }
+      })
+      .then(async (res) => {
+        if (!res.ok && res.status !== 206) {
+          try {
+            const data = await res.json();
+            throw new Error(data.error?.message || 'This share link is invalid or expired.');
+          } catch(e) {
+            if (e instanceof TypeError) throw e;
+            throw new Error(res.status === 404 ? 'File not found or share link revoked.' : 'Share link unavailable.');
+          }
+        }
+        
+        const sizeBytes = getSizeBytesFromHeaders(res.headers);
+        
+        let filename = 'download';
+        const cdHeader = res.headers.get('content-disposition');
+        if (cdHeader) {
+          filename = getFilenameFromContentDisposition(cdHeader);
+        }
+        
+        const mimeType = res.headers.get('content-type') || 'application/octet-stream';
+        
+        publicFileDetails = { filename, sizeBytes, mimeType };
+        
+        document.getElementById('public-filename').textContent = filename;
+        document.getElementById('public-filesize').textContent = formatBytes(sizeBytes);
+        
+        const iconName = getFileIconName(filename, mimeType);
+        const iconBox = document.getElementById('public-file-icon');
+        const iconInner = document.getElementById('public-file-icon-inner');
+        
+        iconBox.className = 'public-file-icon';
+        iconInner.setAttribute('data-lucide', iconName);
+        
+        if (iconName === 'video') iconBox.classList.add('video');
+        
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        renderIcons(content);
+      })
+      .catch(err => {
+        loading.style.display = 'none';
+        document.getElementById('public-error-message').textContent = err.message;
+        errorDiv.style.display = 'block';
+        renderIcons(errorDiv);
+      });
+    }
+
+    function downloadPublicFile() {
+      if (!publicShareToken) return;
+      window.location.href = `${API_BASE}/s/${publicShareToken}`;
+    }
+
+    // Helper functions
+    function getSizeBytesFromHeaders(headers) {
+      const contentRange = headers.get('content-range');
+      if (contentRange) {
+        const parts = contentRange.split('/');
+        if (parts.length > 1) {
+          const totalSize = parseInt(parts[1], 10);
+          if (!isNaN(totalSize)) return totalSize;
+        }
+      }
+      
+      const contentLength = parseInt(headers.get('content-length'), 10);
+      return isNaN(contentLength) ? 0 : contentLength;
+    }
+
+    function getFilenameFromContentDisposition(header) {
+      if (!header) return 'download';
+      const utf8Match = header.match(/filename\*=UTF-8''([^;]+)/i);
+      if (utf8Match) return decodeURIComponent(utf8Match[1]);
+      
+      const standardMatch = header.match(/filename="?([^";]+)"?/i);
+      if (standardMatch) return standardMatch[1];
+      
+      return 'download';
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function formatDate(isoString) {
+      if (!isoString) return '—';
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return '—';
+      
+      return d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) + ' ' + d.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    function getFileIconName(filename, mime) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (ext === 'pdf') return 'file-text';
+      if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) return 'video';
+      if (['txt', 'md', 'log'].includes(ext)) return 'file-type';
+      if (['xlsx', 'xls', 'csv'].includes(ext)) return 'table';
+      if (['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(ext)) return 'image';
+      return 'file';
+    }
+
+    function getFileIconClass(filename, mime) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (ext === 'pdf') return 'item-icon icon-pdf-box';
+      if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) return 'item-icon icon-video-box';
+      if (['txt', 'md', 'log'].includes(ext)) return 'item-icon icon-text-box';
+      if (['xlsx', 'xls', 'csv'].includes(ext)) return 'item-icon icon-sheet-box';
+      return 'item-icon icon-file-box';
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Link copied to clipboard!");
+      }).catch(err => {
+        showToast("Failed to copy link.", "error");
+      });
+    }
+
+    function escapeHtml(string) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return String(string).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Start App
+    window.addEventListener('DOMContentLoaded', () => {
+      // One global pass renders all static icons up front — including those in
+      // modals and the upload panel, which live outside the .view-container tree
+      // that transitionToView() scopes its (now targeted) icon passes to. Every
+      // later pass is scoped to just the container that changed.
+      renderIcons();
+      initializeApp();
+    });
+  </script>
+</body>
+</html>

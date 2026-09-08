@@ -1,0 +1,15 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+starlette==0.46.2
+pydantic==2.12.5
+pydantic-settings==2.8.1
+supabase==2.31.0
+supabase-auth==2.31.0
+httpx==0.28.1
+PyJWT==2.12.1
+python-jose==3.4.0
+python-multipart==0.0.27
+email-validator==2.2.0
+redis==5.2.1
+cryptography==44.0.0
+anyio==4.12.0

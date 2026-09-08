@@ -1,0 +1,29 @@
+{
+  "name": "telecloud-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "TeleCloud web client \u2014 cloud storage powered by Telegram.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide": "^0.456.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  },
+  "author": "Suryansh Sharma",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/D-Deadric-C/telecloud.git",
+    "directory": "frontend"
+  },
+  "homepage": "https://github.com/D-Deadric-C/telecloud#readme",
+  "bugs": {
+    "url": "https://github.com/D-Deadric-C/telecloud/issues"
+  }
+}

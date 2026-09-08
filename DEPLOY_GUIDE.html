@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TeleCloud — Free Deployment Guide (Render + Vercel)</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --border:#2b3444;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#4f9cff; --accent2:#39d98a;
+    --warn:#ffb454; --danger:#ff6b6b; --code:#0b0f16; --chip:#233044;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:32px 20px 96px}
+  header.hero{
+    background:linear-gradient(135deg,#132033,#0d1117);
+    border:1px solid var(--border); border-radius:var(--radius);
+    padding:28px 28px 22px; margin-bottom:28px;
+  }
+  header.hero h1{margin:0 0 6px; font-size:28px; letter-spacing:.2px}
+  header.hero p{margin:6px 0 0; color:var(--muted)}
+  .pill{display:inline-block; background:var(--chip); color:var(--text);
+    border:1px solid var(--border); border-radius:999px; padding:3px 11px;
+    font-size:12.5px; margin:6px 6px 0 0}
+  h2{margin:40px 0 14px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px}
+  h3{margin:26px 0 8px; font-size:17px}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code); border:1px solid var(--border); border-radius:6px;
+    padding:1.5px 6px; font-family:"SF Mono",Consolas,Menlo,monospace; font-size:13.5px; color:#cde4ff}
+  pre{background:var(--code); border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; overflow:auto; font-family:"SF Mono",Consolas,Menlo,monospace;
+    font-size:13px; line-height:1.55; position:relative}
+  pre code{background:none;border:none;padding:0;color:#d7e6f5}
+  .step{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 22px; margin:16px 0; position:relative}
+  .step h3{margin-top:0}
+  .stepnum{display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; background:var(--accent); color:#04121f;
+    font-weight:700; font-size:14px; margin-right:10px; vertical-align:middle}
+  ol,ul{margin:8px 0 8px; padding-left:22px}
+  li{margin:5px 0}
+  .note,.warn,.danger,.ok{border-radius:10px; padding:12px 15px; margin:14px 0; border:1px solid}
+  .note{background:#12202f; border-color:#25415c}
+  .warn{background:#2a2413; border-color:#5c4a1e}
+  .danger{background:#2c1717; border-color:#5c2626}
+  .ok{background:#12261c; border-color:#245c3a}
+  .note b,.warn b,.danger b,.ok b{display:inline-block;margin-right:4px}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:14px}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--text)}
+  td code{white-space:nowrap}
+  .toc{background:var(--panel2); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px}
+  .toc ol{columns:2; -webkit-columns:2; column-gap:32px}
+  .toc a{color:var(--text)}
+  .chk{display:flex; align-items:flex-start; gap:10px; margin:6px 0}
+  .chk input{margin-top:5px; width:16px; height:16px; accent-color:var(--accent2)}
+  .copybtn{position:absolute; top:8px; right:8px; background:var(--chip); color:var(--text);
+    border:1px solid var(--border); border-radius:6px; font-size:11.5px; padding:3px 9px; cursor:pointer}
+  .copybtn:hover{background:#2d3c52}
+  .muted{color:var(--muted)}
+  .kicker{color:var(--accent2); font-weight:700; font-size:12.5px; letter-spacing:.8px; text-transform:uppercase}
+  hr{border:none;border-top:1px solid var(--border);margin:32px 0}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}.toc ol{columns:1}}
+  footer{margin-top:48px; color:var(--muted); font-size:13px; text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">TeleCloud · Deployment Runbook</div>
+  <h1>Deploy TeleCloud for free — Render + Vercel</h1>
+  <p>Exact, ordered, click-by-click steps to take this repo from local to a live URL. Everything here uses free tiers only.</p>
+  <div>
+    <span class="pill">Backend → Render</span>
+    <span class="pill">Frontend → Vercel</span>
+    <span class="pill">DB/Auth → Supabase</span>
+    <span class="pill">Redis+QStash → Upstash</span>
+    <span class="pill">Storage → Telegram</span>
+  </div>
+</header>
+
+<div class="note">
+  <b>Read the order first.</b> There is a chicken-and-egg: the backend needs the frontend's URL (for CORS + email redirects), and the frontend needs the backend's URL. The trick is a <b>two-pass</b> deploy — deploy the backend first with placeholders, deploy the frontend using the backend URL, then come back and fill the two frontend-dependent values on the backend. The steps below already handle this; just don't skip around.
+</div>
+
+<h2 id="toc">Contents</h2>
+<div class="toc">
+  <ol>
+    <li><a href="#accounts">Create the accounts</a></li>
+    <li><a href="#supabase">Provision Supabase (DB + Auth)</a></li>
+    <li><a href="#migrations">Apply the database migrations</a></li>
+    <li><a href="#upstash">Provision Upstash (Redis + QStash)</a></li>
+    <li><a href="#telegram">Set up Telegram bots + channels</a></li>
+    <li><a href="#github">Push the repo to GitHub</a></li>
+    <li><a href="#render">Deploy the backend to Render</a></li>
+    <li><a href="#vercel">Deploy the frontend to Vercel</a></li>
+    <li><a href="#wire">Wire the two together (2nd pass)</a></li>
+    <li><a href="#supaurls">Configure Supabase Auth URLs</a></li>
+    <li><a href="#qstash">Schedule the cleanup jobs (optional)</a></li>
+    <li><a href="#verify">Verify end-to-end</a></li>
+    <li><a href="#env">Env var reference</a></li>
+    <li><a href="#trouble">Troubleshooting / known hiccups</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="accounts">Step 1 — Create the accounts</h2>
+<div class="step">
+  <h3><span class="stepnum">1</span>Sign up (all free, no card needed)</h3>
+  <ul>
+    <li><a href="https://github.com" target="_blank">GitHub</a> — hosts the code; Render &amp; Vercel deploy from it.</li>
+    <li><a href="https://supabase.com" target="_blank">Supabase</a> — Postgres database + Auth.</li>
+    <li><a href="https://upstash.com" target="_blank">Upstash</a> — Redis (rate limiting) + QStash (cron cleanup).</li>
+    <li><a href="https://render.com" target="_blank">Render</a> — hosts the FastAPI backend.</li>
+    <li><a href="https://vercel.com" target="_blank">Vercel</a> — hosts the frontend.</li>
+    <li><a href="https://telegram.org" target="_blank">Telegram</a> account (for @BotFather) — the file storage backend.</li>
+  </ul>
+  <div class="note"><b>Tip:</b> sign in to Render and Vercel <i>with GitHub</i> — it makes repo import one click.</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="supabase">Step 2 — Provision Supabase (DB + Auth)</h2>
+<div class="step">
+  <h3><span class="stepnum">2</span>Create the project and grab keys</h3>
+  <ol>
+    <li>In the Supabase dashboard → <b>New project</b>. Give it a name and a strong DB password (save it).</li>
+    <li><b class="muted">Pick a region and remember it.</b> Everything else (Render, Upstash) should sit in the <i>same</i> region — this is the single biggest performance lever (see hiccups).</li>
+    <li>Wait for provisioning (~2 min), then open <b>Project Settings → API</b> and copy:
+      <table>
+        <tr><th>Supabase value</th><th>Env var it becomes</th></tr>
+        <tr><td>Project URL</td><td><code>SUPABASE_URL</code></td></tr>
+        <tr><td>Project API keys → <code>anon public</code></td><td><code>SUPABASE_ANON_KEY</code></td></tr>
+        <tr><td>Project API keys → <code>service_role</code> (secret)</td><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td></tr>
+        <tr><td>JWT Settings → <code>JWT Secret</code></td><td><code>SUPABASE_JWT_SECRET</code></td></tr>
+      </table>
+    </li>
+    <li>Open <b>Project Settings → Database → Connection string</b> and copy the URI (you'll use it once, to run migrations). This is <code>DATABASE_URL</code> — the app itself never needs it.</li>
+  </ol>
+  <div class="danger"><b>Never</b> put <code>service_role</code> or the JWT secret in the frontend or in git. The <code>anon</code> key is the only Supabase value that's public by design.</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="migrations">Step 3 — Apply the database migrations</h2>
+<div class="step">
+  <h3><span class="stepnum">3</span>Run the 5 SQL files — the app 500s without this</h3>
+  <p>The schema, row-level-security policies, and functions live in <code>telecloud/database/migrations/</code>. Nothing runs them for you. Apply them <b>in order</b>.</p>
+  <p><b>Easiest way (dashboard):</b> Supabase → <b>SQL Editor</b> → <b>New query</b>. Open each file, paste its contents, click <b>Run</b>, in this exact order:</p>
+  <pre><code>0001_schema.sql
+0002_rls.sql
+0003_functions.sql
+0004_profiles_verification_token.sql
+0005_supabase_email_verification.sql</code></pre>
+  <p><b>Or via CLI</b> (from the repo root), using the connection string from Step 2:</p>
+  <pre><button class="copybtn">Copy</button><code>psql "$DATABASE_URL" -f telecloud/database/migrations/0001_schema.sql
+psql "$DATABASE_URL" -f telecloud/database/migrations/0002_rls.sql
+psql "$DATABASE_URL" -f telecloud/database/migrations/0003_functions.sql
+psql "$DATABASE_URL" -f telecloud/database/migrations/0004_profiles_verification_token.sql
+psql "$DATABASE_URL" -f telecloud/database/migrations/0005_supabase_email_verification.sql</code></pre>
+  <div class="warn"><b>Verify:</b> In Supabase → <b>Table Editor</b> you should now see the app's tables (profiles, folders, files, shares, …). If they're missing, the migrations didn't apply and every authed request will fail with a 500 even though <code>/health</code> is green.</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="upstash">Step 4 — Provision Upstash (Redis + QStash)</h2>
+<div class="step">
+  <h3><span class="stepnum">4</span>Redis (rate limiting + retry queue)</h3>
+  <ol>
+    <li>Upstash console → <b>Redis → Create Database</b>. Choose the <b>same region</b> as Supabase.</li>
+    <li>On the database page, scroll to <b>REST API</b> and copy:
+      <table>
+        <tr><th>Upstash value</th><th>Env var</th></tr>
+        <tr><td>REST URL (<code>UPSTASH_REDIS_REST_URL</code>)</td><td><code>UPSTASH_REDIS_REST_URL</code></td></tr>
+        <tr><td>REST Token</td><td><code>UPSTASH_REDIS_REST_TOKEN</code></td></tr>
+      </table>
+    </li>
+  </ol>
+  <h3>QStash (scheduled cleanup callbacks)</h3>
+  <ol>
+    <li>Upstash console → <b>QStash</b>. On the QStash page find <b>Signing keys</b> and copy both:
+      <table>
+        <tr><th>QStash value</th><th>Env var</th></tr>
+        <tr><td>Current signing key</td><td><code>QSTASH_CURRENT_SIGNING_KEY</code></td></tr>
+        <tr><td>Next signing key</td><td><code>QSTASH_NEXT_SIGNING_KEY</code></td></tr>
+      </table>
+    </li>
+    <li>You'll create the actual scheduled calls in <a href="#qstash">Step 11</a>, after the backend has a URL. The keys above just let the backend verify QStash's signatures.</li>
+  </ol>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="telegram">Step 5 — Set up Telegram bots + channels</h2>
+<div class="step">
+  <h3><span class="stepnum">5</span>Bots and storage channels</h3>
+  <ol>
+    <li>In Telegram, message <b>@BotFather</b> → <code>/newbot</code>. Create <b>at least one</b> bot (more = more upload throughput). Copy each <b>bot token</b> → these become the comma-separated <code>TELEGRAM_BOT_TOKENS</code>.</li>
+    <li>Create <b>one or more private channels</b> (these physically store the file chunks).</li>
+    <li>In each channel: <b>Add member → add your bot(s) → promote to Admin</b> (they must be able to post &amp; delete messages).</li>
+    <li>Get each channel's numeric id (a negative bigint like <code>-1001234567890</code>). Quick way: forward a message from the channel to <b>@userinfobot</b> / <b>@getidsbot</b>, or read it from the Bot API. These become the comma-separated <code>TELEGRAM_CHANNEL_IDS</code>.</li>
+  </ol>
+  <div class="note">Example values:<br><code>TELEGRAM_BOT_TOKENS=123456:ABC-token-one,789012:DEF-token-two</code><br><code>TELEGRAM_CHANNEL_IDS=-1001234567890,-1009876543210</code></div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="github">Step 6 — Push the repo to GitHub</h2>
+<div class="step">
+  <h3><span class="stepnum">6</span>Get the code on GitHub (Render + Vercel deploy from it)</h3>
+  <div class="danger"><b>Before pushing:</b> confirm <code>.env</code> and <code>.env.local</code> are git-ignored so real secrets never leave your machine. Only <code>.env.example</code> should be committed.</div>
+  <pre><button class="copybtn">Copy</button><code># from the repo root (tele_cloud)
+git status                 # make sure .env is NOT listed
+git add -A
+git commit -m "Add Render/Vercel deploy config"
+# connect this checkout to Suryansh Sharma's repository:
+git remote set-url origin https://github.com/D-Deadric-C/telecloud.git
+git branch -M main
+git push -u origin main</code></pre>
+  <div class="note">This repo already contains everything the platforms need: <code>requirements.txt</code>, <code>render.yaml</code>, and <code>runtime.txt</code> at the root, and <code>frontend/vercel.json</code>.</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="render">Step 7 — Deploy the backend to Render</h2>
+<div class="step">
+  <h3><span class="stepnum">7</span>Create the web service from the Blueprint</h3>
+  <ol>
+    <li>Render dashboard → <b>New → Blueprint</b> → connect your GitHub repo. Render reads <code>render.yaml</code> and proposes a service called <b>telecloud-api</b>.</li>
+    <li><b>Region:</b> pick the one closest to your Supabase region (Render free tier offers Oregon, Ohio, Virginia, Frankfurt, Singapore). Matching regions is what keeps requests sub-second.</li>
+    <li>Render will ask for the <code>sync:false</code> secrets. Fill in everything you gathered:
+      <ul>
+        <li><code>TELEGRAM_BOT_TOKENS</code>, <code>TELEGRAM_CHANNEL_IDS</code></li>
+        <li><code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>, <code>SUPABASE_JWT_SECRET</code></li>
+        <li><code>UPSTASH_REDIS_REST_URL</code>, <code>UPSTASH_REDIS_REST_TOKEN</code></li>
+        <li><code>QSTASH_CURRENT_SIGNING_KEY</code>, <code>QSTASH_NEXT_SIGNING_KEY</code></li>
+      </ul>
+    </li>
+    <li>For the two frontend-dependent vars, set a <b>temporary placeholder</b> for now — you'll fix them in Step 9 once Vercel gives you a URL:
+      <ul>
+        <li><code>APP_BASE_URL</code> = <code>https://placeholder.vercel.app</code></li>
+        <li><code>CORS_ALLOWED_ORIGINS</code> = <code>https://placeholder.vercel.app</code></li>
+      </ul>
+      (<code>APP_ENV=production</code> and <code>PYTHON_VERSION=3.12.4</code> are already baked into <code>render.yaml</code>.)
+    </li>
+    <li>Click <b>Apply / Create</b>. Render runs <code>pip install -r requirements.txt</code> then starts <code>uvicorn telecloud.main:app --host 0.0.0.0 --port $PORT</code>.</li>
+    <li>When live, copy the service URL, e.g. <code>https://telecloud-api.onrender.com</code> — call this the <b>BACKEND URL</b>.</li>
+  </ol>
+  <div class="ok"><b>Smoke test:</b> open <code>&lt;BACKEND URL&gt;/health</code> in a browser. You should see <code>{"status":"ok"}</code>. (First hit after idle may take 30–60s — free tier cold start.)</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="vercel">Step 8 — Deploy the frontend to Vercel</h2>
+<div class="step">
+  <h3><span class="stepnum">8</span>Import the repo and set the API base</h3>
+  <ol>
+    <li>Vercel → <b>Add New → Project</b> → import the same GitHub repo.</li>
+    <li><b>Root Directory:</b> set to <code>frontend</code> (important — the app isn't at the repo root). Framework auto-detects as <b>Vite</b>; build command <code>npm run build</code>, output <code>dist</code> (already in <code>frontend/vercel.json</code>).</li>
+    <li>Under <b>Environment Variables</b>, add these three (all <i>public</i> build-time vars):
+      <table>
+        <tr><th>Name</th><th>Value</th><th>Why</th></tr>
+        <tr><td><code>VITE_API_BASE</code></td><td>the <b>BACKEND URL</b> from Step 7</td><td>where the app sends API calls</td></tr>
+        <tr><td><code>VITE_SUPABASE_URL</code></td><td>your <code>SUPABASE_URL</code></td><td>enables silent token refresh</td></tr>
+        <tr><td><code>VITE_SUPABASE_ANON_KEY</code></td><td>your <code>anon</code> key</td><td>enables silent token refresh</td></tr>
+      </table>
+    </li>
+    <li><b>Deploy.</b> Copy the resulting URL, e.g. <code>https://telecloud.vercel.app</code> — call this the <b>FRONTEND URL</b>.</li>
+  </ol>
+  <div class="warn"><b>Don't skip the last two vars.</b> With only <code>VITE_API_BASE</code>, the app still works but an expired session (after ~1h) bounces the user to the login screen instead of refreshing silently (<code>frontend/src/config.js</code> → <code>CAN_REFRESH</code>).</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="wire">Step 9 — Wire the two together (second pass)</h2>
+<div class="step">
+  <h3><span class="stepnum">9</span>Point the backend at the real frontend URL</h3>
+  <p>Now that you have the <b>FRONTEND URL</b>, go back to <b>Render → telecloud-api → Environment</b> and replace the placeholders:</p>
+  <table>
+    <tr><th>Env var</th><th>Set to</th><th>Notes</th></tr>
+    <tr><td><code>APP_BASE_URL</code></td><td>the <b>FRONTEND URL</b></td><td>drives share links + email confirmation redirect. <b>Must be the Vercel URL, not Render.</b> No trailing slash.</td></tr>
+    <tr><td><code>CORS_ALLOWED_ORIGINS</code></td><td>the <b>FRONTEND URL</b></td><td>comma-separated if you have several. No trailing slash, no path.</td></tr>
+  </table>
+  <p>Save — Render redeploys automatically. (Vercel <b>preview</b> URLs like <code>telecloud-abc123.vercel.app</code> are already allowed by a built-in <code>*.vercel.app</code> regex, so you don't need to list every preview.)</p>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="supaurls">Step 10 — Configure Supabase Auth URLs</h2>
+<div class="step">
+  <h3><span class="stepnum">10</span>So email-confirmation links land on the frontend</h3>
+  <p>Supabase → <b>Authentication → URL Configuration</b>:</p>
+  <ul>
+    <li><b>Site URL</b> = the <b>FRONTEND URL</b> (e.g. <code>https://telecloud.vercel.app</code>).</li>
+    <li><b>Redirect URLs</b> — add both:
+      <ul>
+        <li><code>https://telecloud.vercel.app</code></li>
+        <li><code>https://telecloud.vercel.app/index.html</code></li>
+      </ul>
+    </li>
+  </ul>
+  <div class="warn">If these are wrong, the "confirm your email" link either errors or dumps the user on the wrong origin, and login never completes.</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="qstash">Step 11 — Schedule the cleanup jobs (optional)</h2>
+<div class="step">
+  <h3><span class="stepnum">11</span>QStash → backend cron callbacks</h3>
+  <p>Only needed if you want automated orphan-sweeping / deferred-delete cleanup. Core upload/download/share all work without it.</p>
+  <p>In Upstash <b>QStash → Schedules → Create</b>, add two schedules that POST to your backend (QStash signs them; the backend verifies with the keys from Step 4):</p>
+  <table>
+    <tr><th>Destination URL</th><th>Suggested cron</th></tr>
+    <tr><td><code>&lt;BACKEND URL&gt;/jobs/sweep-orphans</code></td><td>e.g. hourly <code>0 * * * *</code></td></tr>
+    <tr><td><code>&lt;BACKEND URL&gt;/jobs/deferred-delete</code></td><td>e.g. every 15 min <code>*/15 * * * *</code></td></tr>
+  </table>
+  <div class="note">On Render's free tier the backend sleeps when idle, so a callback may hit a cold start; QStash retries, so cleanup still runs eventually — just not punctually.</div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="verify">Step 12 — Verify end-to-end</h2>
+<div class="step">
+  <h3><span class="stepnum">12</span>Acceptance checklist</h3>
+  <div class="chk"><input type="checkbox"><span><code>GET &lt;BACKEND URL&gt;/health</code> → <code>200 {"status":"ok"}</code>.</span></div>
+  <div class="chk"><input type="checkbox"><span>Open the <b>FRONTEND URL</b>, sign up → receive Supabase confirmation email → click link → land back on the frontend and reach the dashboard.</span></div>
+  <div class="chk"><input type="checkbox"><span>Browser DevTools → <b>Network</b>: API calls to the backend return <code>Access-Control-Allow-Origin: &lt;frontend&gt;</code> with <b>no</b> CORS errors in the console.</span></div>
+  <div class="chk"><input type="checkbox"><span>Upload a file, then download it — the filename is correct (proves <code>Content-Disposition</code> is exposed).</span></div>
+  <div class="chk"><input type="checkbox"><span>Create a share link, open it in an <b>incognito</b> window — it downloads and shows the correct size (proves <code>Content-Range</code>/<code>Content-Length</code> exposed and the public <code>/s/{token}</code> route works).</span></div>
+  <div class="chk"><input type="checkbox"><span>Leave the tab idle &gt;1 hour, act again → no forced logout (token refresh works).</span></div>
+</div>
+
+<!-- ============================================================= -->
+<h2 id="env">Env var reference</h2>
+<table>
+  <tr><th>Variable</th><th>Where</th><th>Required?</th><th>Value</th></tr>
+  <tr><td><code>TELEGRAM_BOT_TOKENS</code></td><td>Render</td><td>Yes</td><td>comma-separated bot tokens</td></tr>
+  <tr><td><code>TELEGRAM_CHANNEL_IDS</code></td><td>Render</td><td>Yes</td><td>comma-separated negative channel ids</td></tr>
+  <tr><td><code>SUPABASE_URL</code></td><td>Render</td><td>Yes</td><td>project URL</td></tr>
+  <tr><td><code>SUPABASE_ANON_KEY</code></td><td>Render + Vercel</td><td>Yes</td><td>public anon key</td></tr>
+  <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>Render</td><td>Yes</td><td>secret — backend only</td></tr>
+  <tr><td><code>SUPABASE_JWT_SECRET</code></td><td>Render</td><td>Yes</td><td>secret — backend only</td></tr>
+  <tr><td><code>UPSTASH_REDIS_REST_URL</code></td><td>Render</td><td>Yes</td><td>REST URL</td></tr>
+  <tr><td><code>UPSTASH_REDIS_REST_TOKEN</code></td><td>Render</td><td>Yes</td><td>REST token</td></tr>
+  <tr><td><code>QSTASH_CURRENT_SIGNING_KEY</code></td><td>Render</td><td>Yes</td><td>current signing key</td></tr>
+  <tr><td><code>QSTASH_NEXT_SIGNING_KEY</code></td><td>Render</td><td>Yes</td><td>next signing key</td></tr>
+  <tr><td><code>APP_BASE_URL</code></td><td>Render</td><td>Yes</td><td><b>Vercel</b> frontend URL, no trailing slash</td></tr>
+  <tr><td><code>CORS_ALLOWED_ORIGINS</code></td><td>Render</td><td>Yes</td><td><b>Vercel</b> origin(s), comma-separated</td></tr>
+  <tr><td><code>APP_ENV</code></td><td>Render</td><td>preset</td><td><code>production</code> (in render.yaml)</td></tr>
+  <tr><td><code>PYTHON_VERSION</code></td><td>Render</td><td>preset</td><td><code>3.12.4</code> (in render.yaml)</td></tr>
+  <tr><td><code>RESEND_API_KEY</code> / <code>RESEND_FROM_EMAIL</code></td><td>—</td><td>No</td><td>deprecated; email is Supabase-managed. Leave unset.</td></tr>
+  <tr><td><code>VITE_API_BASE</code></td><td>Vercel</td><td>Yes</td><td>the Render backend URL</td></tr>
+  <tr><td><code>VITE_SUPABASE_URL</code></td><td>Vercel</td><td>Recommended</td><td>enables silent token refresh</td></tr>
+  <tr><td><code>VITE_SUPABASE_ANON_KEY</code></td><td>Vercel</td><td>Recommended</td><td>enables silent token refresh</td></tr>
+  <tr><td><code>DATABASE_URL</code></td><td>local only</td><td>Migrations only</td><td>used once to run SQL; app never reads it</td></tr>
+</table>
+
+<!-- ============================================================= -->
+<h2 id="trouble">Troubleshooting / known hiccups</h2>
+
+<div class="step">
+  <h3>Everything 500s but <code>/health</code> is fine</h3>
+  <p>You didn't apply the migrations (<a href="#migrations">Step 3</a>), or applied them out of order. Re-run all five; confirm the tables exist in Supabase Table Editor.</p>
+</div>
+<div class="step">
+  <h3>First request takes 30–60 seconds</h3>
+  <p>Render free tier spins the service down after ~15 min idle; the next request cold-starts. The frontend already retries with a "waking up" notice — it's a UX delay, not a failure.</p>
+</div>
+<div class="step">
+  <h3>App feels slow even when warm</h3>
+  <p>Region mismatch. Put Render, Supabase, and Upstash in the <b>same</b> region. Cross-region round-trips (there are several per request) dominate latency.</p>
+</div>
+<div class="step">
+  <h3>CORS errors in the console</h3>
+  <p>Check <code>CORS_ALLOWED_ORIGINS</code> on Render exactly matches the frontend origin: <code>https</code> scheme, host only, <b>no trailing slash, no path</b>. Preview URLs are covered by the built-in <code>*.vercel.app</code> regex; a <i>custom</i> domain must be added explicitly.</p>
+</div>
+<div class="step">
+  <h3>Confirmation email never arrives / link is broken</h3>
+  <p>Two causes: (1) Supabase's built-in SMTP is rate-limited to a few emails/hour and often lands in spam — wait and check spam. (2) The Auth URL config (<a href="#supaurls">Step 10</a>) is wrong or <code>APP_BASE_URL</code> points at Render instead of Vercel.</p>
+</div>
+<div class="step">
+  <h3>Download filename is generic / share shows "0 Bytes"</h3>
+  <p>Expose-headers aren't reaching the browser. This repo already sets <code>expose_headers</code> in the CORS middleware, so if you see this, a proxy or a stale deploy is stripping them — trigger a fresh Render deploy.</p>
+</div>
+<div class="step">
+  <h3>Project stopped responding after a week</h3>
+  <p>Supabase free projects auto-pause after ~7 days of inactivity. Open the Supabase dashboard and un-pause. (Render also sleeps, but wakes on the next request.)</p>
+</div>
+
+<footer>
+  TeleCloud deployment runbook · generated for this repo · all steps use free tiers.<br>
+  Your progress checkboxes are saved locally in this browser.
+</footer>
+
+</div>
+
+<script>
+  // Copy buttons
+  document.querySelectorAll('.copybtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var code = btn.parentElement.querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(function(){
+        var t = btn.textContent; btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = t; }, 1200);
+      });
+    });
+  });
+  // Persist checklist state
+  var boxes = document.querySelectorAll('.chk input[type=checkbox]');
+  boxes.forEach(function(b,i){
+    var key = 'tc-deploy-chk-'+i;
+    b.checked = localStorage.getItem(key) === '1';
+    b.addEventListener('change', function(){
+      localStorage.setItem(key, b.checked ? '1' : '0');
+    });
+  });
+</script>
+</body>
+</html>

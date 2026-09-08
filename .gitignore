@@ -1,0 +1,44 @@
+# --- Secrets / local config ---
+# NEVER commit a filled-in .env. Only .env.example is tracked.
+.env
+.env.*
+!.env.example
+
+# --- Node / frontend ---
+node_modules/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.Python
+
+# --- Tooling caches ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Claude Code local settings (may contain local secrets in command history) ---
+.claude/settings.local.json
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Agentic reference / scratch docs ---
+/SPEC.md
+/BACKEND_RENDER_BRIEF.md
+/FRONTEND_BRIEF.md
+/DRIFT_REPORT.md
+/TESTING.md
+/prompts/

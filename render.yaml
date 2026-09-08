@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: telecloud-api
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn telecloud.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+      # Secrets — set these in the Render dashboard (sync:false = not in git):
+      - key: TELEGRAM_BOT_TOKENS
+        sync: false
+      - key: TELEGRAM_CHANNEL_IDS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: QSTASH_CURRENT_SIGNING_KEY
+        sync: false
+      - key: QSTASH_NEXT_SIGNING_KEY
+        sync: false
+      - key: APP_BASE_URL
+        sync: false   # = the Vercel frontend URL, no trailing slash
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false   # = the Vercel frontend URL (+ any extra origins, comma-separated)
+      - key: APP_ENV
+        value: production
