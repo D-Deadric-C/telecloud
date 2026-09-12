@@ -19,6 +19,7 @@ Dependencies are the §6.11 set: ``config`` (transitively), ``shared``,
 
 from __future__ import annotations
 
+import asyncio
 from uuid import UUID
 
 from telecloud.database import Database, files_repo, folders_repo, get_db
@@ -125,11 +126,11 @@ async def list_contents(
     try:
         if folder_id is not None:
             await _load_owned_folder(db, folder_id, user)
-        subfolders = await folders_repo.list_children(
-            db, owner_id=user.id, parent_id=folder_id
-        )
-        files = await files_repo.list_in_folder(
-            db, owner_id=user.id, folder_id=folder_id
+        # These independent PostgREST reads share one authenticated HTTP client
+        # and run concurrently, saving one full database round trip per folder.
+        subfolders, files = await asyncio.gather(
+            folders_repo.list_children(db, owner_id=user.id, parent_id=folder_id),
+            files_repo.list_in_folder(db, owner_id=user.id, folder_id=folder_id),
         )
         return subfolders, files
     finally:

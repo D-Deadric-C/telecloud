@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">TeleCloud</title>
+  <rect width="512" height="512" rx="112" fill="#101a36"/>
+  <path d="M153 350h218c50 0 90-38 90-86 0-45-36-82-82-86-19-63-77-108-145-108-78 0-143 59-151 135-40 12-69 49-69 92 0 53 43 96 96 96h43z" fill="#faf3e0" transform="translate(18 -1) scale(.94)"/>
+  <path d="M256 174v132m0 0-50-50m50 50 50-50" fill="none" stroke="#ec6d1f" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

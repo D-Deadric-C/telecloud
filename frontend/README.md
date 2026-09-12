@@ -4,17 +4,18 @@ Maintained by **Suryansh Sharma**.
 
 [Repository](https://github.com/D-Deadric-C/telecloud) · [LinkedIn](https://www.linkedin.com/in/suryansh-sharma-a76b52324/) · [MIT License](../LICENSE)
 
-The TeleCloud web client — a Vite + vanilla-JS single-page app. Same UI as before,
-rewritten for reliability and clean hosting (Vercel frontend ↔ Render backend).
+The TeleCloud web client — an installable Vite + vanilla-JS progressive web app.
+It works with any HTTPS-hosted TeleCloud API.
 
 ## What changed vs. the old single `index.html`
 
 - **No more silent session death.** The access token is refreshed automatically —
   proactively before it expires and reactively on a `401` (single-flight, against
   Supabase's token endpoint). Sessions no longer "randomly fail" after ~1 hour.
-- **Survives backend cold starts.** Every request retries transient failures
-  (network errors, timeouts, `502/503/504`) with backoff, and shows a one-time
-  "waking up the server…" notice — important for Render's free tier.
+- **Fast reconnects.** Requests retry one transient failure with a short backoff
+  and show a reconnecting notice without holding the UI for long periods.
+- **Installable and offline-ready.** A web app manifest and service worker provide
+  home-screen installation and cache the application shell.
 - **Configurable API URL** via `VITE_API_BASE` (no hardcoded `127.0.0.1:8000`).
 - **Snappier rendering.** Scoped icon rendering, keyed DOM diffing (scroll/hover
   survive updates), and a parallel folder-tree scan instead of N+1 sequential
@@ -73,7 +74,7 @@ Run the backend separately (see [the root quickstart](../README.md#quickstart)).
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `VITE_API_BASE` | prod only | Backend base URL, e.g. `https://telecloud-api.onrender.com`. Empty = same-origin (dev proxy). |
+| `VITE_API_BASE` | prod only | Backend base URL, e.g. `https://api.telecloud.example`. Empty = same-origin (dev proxy). |
 | `VITE_SUPABASE_URL` | yes* | Supabase project URL — used for client-side token refresh. |
 | `VITE_SUPABASE_ANON_KEY` | yes* | Supabase anon (public) key — gated by RLS, safe to ship to browsers. |
 | `DEV_API_TARGET` | no | Dev-proxy target when `VITE_API_BASE` is empty. |
@@ -85,7 +86,7 @@ bounces the user to the login screen instead of refreshing seamlessly.
 
 1. Import the repo in Vercel and set **Root Directory** to `frontend/`.
    (Framework preset auto-detects as **Vite**; build `npm run build`, output `dist`.)
-2. Add the env vars above (`VITE_API_BASE` = your Render URL, plus the two
+2. Add the env vars above (`VITE_API_BASE` = your API URL, plus the two
    Supabase values) for Production (and Preview, if you use preview deploys).
 3. Deploy. `vercel.json` rewrites all routes to `index.html` (SPA).
 

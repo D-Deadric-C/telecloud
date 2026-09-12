@@ -1,6 +1,8 @@
 // App entry point: styles, routing, and action wiring.
 
 import './style.css';
+import { initPwa, promptInstall } from './pwa.js';
+import { API_BASE } from './config.js';
 
 import { session, setUser, isLoggedIn } from './session.js';
 import { Auth, setAuthLostHandler, setRetryNoticeHandler, setRetryDoneHandler } from './api.js';
@@ -28,10 +30,23 @@ import {
   loadPublicFileDetails, downloadPublicFile,
 } from './views/share.js';
 
+if (API_BASE) {
+  const apiOrigin = new URL(API_BASE, window.location.href).origin;
+  if (apiOrigin !== window.location.origin) {
+    const preconnect = document.createElement('link');
+    preconnect.rel = 'preconnect';
+    preconnect.href = apiOrigin;
+    preconnect.crossOrigin = 'anonymous';
+    document.head.append(preconnect);
+  }
+}
+
+initPwa((message, type = 'success') => showToast(message, type));
+
 // A 401 anywhere bounces the user cleanly to the login screen.
 setAuthLostHandler(() => { handleLogout(); });
-// Show a full "please wait" screen while a request retries (e.g. Render cold
-// start) — hidden again the moment that request's retry sequence resolves,
+// Show a short reconnecting screen while a transient request retries, then hide
+// it the moment that request's retry sequence resolves,
 // whether it eventually succeeds or gives up. `activeWaits` guards against one
 // retrying request's success hiding the overlay while a second one is still
 // mid-retry (rare but possible if two requests fire close together).
@@ -92,6 +107,10 @@ registerActions({
   'close-modal': (el) => { closeModal(el.dataset.modal); state.activeModalItem = null; },
   'dismiss-toast': (el) => el.closest('.toast')?.remove(),
   'toggle-theme': () => toggleTheme(),
+  'install-app': async () => {
+    const message = await promptInstall();
+    if (message) showToast(message);
+  },
 });
 
 async function initializeApp() {

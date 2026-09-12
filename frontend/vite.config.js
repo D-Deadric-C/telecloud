@@ -24,6 +24,6 @@ export default defineConfig(({ mode }) => {
   return {
     server: { port, proxy },
     preview: { port: Number(process.env.PORT) || 4173, proxy },
-    build: { outDir: 'dist', sourcemap: true },
+    build: { outDir: 'dist', sourcemap: false },
   };
 });

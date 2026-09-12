@@ -6,21 +6,26 @@
   <title>TeleCloud | Suryansh Sharma</title>
   <meta name="author" content="Suryansh Sharma">
   <meta name="description" content="Secure, fast, and unlimited cloud storage powered by Telegram's Bot API as the storage backend. Split, stream, and share files.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#101a36">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TeleCloud">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/telecloud.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/telecloud-192.png">
 </head>
 <body>
 
   <!-- TOAST CONTAINER -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- WAKEUP OVERLAY: shown while a cold-started backend (e.g. Render free tier) is retried -->
+  <!-- CONNECTION OVERLAY: shown briefly while a transient request is retried -->
   <div id="wakeup-overlay" class="wakeup-overlay">
     <div class="wakeup-card">
       <div class="spinner spinner-lg"></div>
-      <h3>Waking up the server</h3>
-      <p>The backend went idle and is starting back up — this can take up to a minute. Hang tight.</p>
+      <h3>Reconnecting</h3>
+      <p>The connection was interrupted. TeleCloud is retrying now.</p>
     </div>
   </div>
 
@@ -91,6 +96,9 @@
           </div>
         </div>
         <nav class="social-links auth-social-links" aria-label="Project and creator links">
+          <button type="button" class="social-link install-app-link" data-action="install-app" hidden>
+            <i data-lucide="download" aria-hidden="true"></i><span>Install TeleCloud</span>
+          </button>
           <a class="social-link social-link-star" href="https://github.com/D-Deadric-C/telecloud" target="_blank" rel="noopener noreferrer">
             <i data-lucide="star" aria-hidden="true"></i><span>Star GitHub repo</span>
           </a>
@@ -179,6 +187,9 @@
 
         <div class="sidebar-bottom">
           <nav class="social-links sidebar-social-links" aria-label="Project and creator links">
+            <button type="button" class="social-link install-app-link" data-action="install-app" hidden>
+              <i data-lucide="download" aria-hidden="true"></i><span>Install TeleCloud</span>
+            </button>
             <a class="social-link social-link-star" href="https://github.com/D-Deadric-C/telecloud" target="_blank" rel="noopener noreferrer">
               <i data-lucide="star" aria-hidden="true"></i><span>Star GitHub repo</span>
             </a>

@@ -93,7 +93,7 @@ export function closeModal(id) {
   document.getElementById(id).classList.remove('active');
 }
 
-// ---- Wakeup overlay (cold-start retry notice) -------------------------------
+// ---- Connection retry overlay ----------------------------------------------
 
 export function showWakeupOverlay() {
   document.getElementById('wakeup-overlay').classList.add('active');

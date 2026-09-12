@@ -1,9 +1,8 @@
 // Robust API client.
 //
 // Every call goes through request(): it attaches the bearer token, proactively
-// refreshes a near-expired token, retries on cold-start/transient failures
-// (network errors, timeouts, 502/503/504 — important for Render free-tier
-// spin-up), refreshes + retries once on a 401, and surfaces the backend's
+// refreshes a near-expired token, retries brief transient failures, refreshes +
+// retries once on a 401, and surfaces the backend's
 // {error:{code,message}} envelope as a typed ApiError.
 
 import { API_BASE } from './config.js';
@@ -21,6 +20,7 @@ export class ApiError extends Error {
 }
 
 const RETRYABLE_STATUS = new Set([502, 503, 504]);
+const RETRY_BASE_DELAY_MS = 250;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Callbacks wired by main.js (kept here to avoid importing UI/view modules).
@@ -28,7 +28,7 @@ let authLostHandler = () => {};
 let retryNoticeHandler = () => {};
 let retryDoneHandler = () => {};
 export function setAuthLostHandler(fn) { authLostHandler = fn; }
-// `retryNoticeHandler` fires once a request starts retrying (e.g. cold-start);
+// `retryNoticeHandler` fires once a request starts retrying after an interruption;
 // `retryDoneHandler` fires exactly when that same request's retry sequence
 // resolves (success or final failure) — never on a blind timeout.
 export function setRetryNoticeHandler(fn) { retryNoticeHandler = fn; }
@@ -42,7 +42,7 @@ function buildUrl(path) {
 // One bare fetch with an optional timeout (timeout=0 disables it, e.g. downloads).
 // `priority` is a browser fetch hint ('high'|'low'|'auto') — we mark background
 // scans 'low' so interactive requests jump the connection-pool queue.
-async function bareFetch(path, { method = 'GET', headers = {}, body, auth = true, timeout = 30_000, priority } = {}) {
+async function bareFetch(path, { method = 'GET', headers = {}, body, auth = true, timeout = 12_000, priority } = {}) {
   const h = { ...headers };
   if (auth && session.access) h.Authorization = `Bearer ${session.access}`;
 
@@ -63,7 +63,7 @@ function isTransient(err) {
 
 // Core request. Returns the raw Response (use requestJson for parsed JSON).
 export async function request(path, opts = {}) {
-  const { json, retries = 2, auth = true, headers = {}, ...rest } = opts;
+  const { json, retries = 1, auth = true, headers = {}, ...rest } = opts;
   const finalHeaders = { ...headers };
   let body = rest.body;
   if (json !== undefined) {
@@ -104,7 +104,7 @@ export async function request(path, opts = {}) {
 
         if (RETRYABLE_STATUS.has(res.status) && attempt < retries) {
           if (attempt === 0) { retryNoticeHandler(); noticeFired = true; }
-          await sleep(800 * 2 ** attempt);
+          await sleep(RETRY_BASE_DELAY_MS * 2 ** attempt);
           attempt += 1;
           continue;
         }
@@ -113,12 +113,12 @@ export async function request(path, opts = {}) {
         if (err instanceof ApiError) throw err;
         if (isTransient(err) && attempt < retries) {
           if (attempt === 0) { retryNoticeHandler(); noticeFired = true; }
-          await sleep(800 * 2 ** attempt);
+          await sleep(RETRY_BASE_DELAY_MS * 2 ** attempt);
           attempt += 1;
           continue;
         }
         const msg = err.name === 'TimeoutError'
-          ? 'The request timed out — the server may be waking up. Please try again.'
+          ? 'The request timed out. Please try again.'
           : 'Network error. Check your connection and that the server is reachable.';
         throw new ApiError(msg, {});
       }

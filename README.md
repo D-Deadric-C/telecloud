@@ -93,13 +93,13 @@ flowchart LR
 
 | Layer | Tools |
 | --- | --- |
-| Web client | Vanilla JavaScript, Vite, Lucide icons |
+| Web client | Installable PWA, vanilla JavaScript, Vite, Lucide icons |
 | API | Python 3.12, FastAPI, Pydantic, HTTPX |
 | Identity and metadata | Supabase Auth, Postgres, row-level security |
 | File bytes | Telegram Bot API and private channels |
 | Rate limits and retries | Upstash Redis |
 | Scheduled cleanup | Upstash QStash |
-| Deployment configuration | Render for the API; Vercel for the frontend |
+| Deployment configuration | Portable Docker API; Vercel-compatible frontend |
 
 ## Quickstart
 
@@ -166,15 +166,15 @@ Open [localhost:5173](http://localhost:5173). The dev server forwards API reques
 
 ## Deploying and scheduling cleanup
 
-The repository includes [`render.yaml`](render.yaml) for the API and [`frontend/vercel.json`](frontend/vercel.json) for the web client.
+The API ships as a portable [`Dockerfile`](Dockerfile), and the installable PWA can be deployed from `frontend/` to any static host.
 
-1. Deploy the API with the root `requirements.txt` and `telecloud.main:app` entrypoint.
-2. Deploy `frontend/` on Vercel with `npm run build` and output directory `dist`.
-3. Set `VITE_API_BASE` to the deployed API URL. Set the backend's `APP_BASE_URL` to the frontend URL and include that frontend origin in `CORS_ALLOWED_ORIGINS`.
+1. Run the API on an always-on container host in the same region as Supabase and Upstash.
+2. Deploy `frontend/` with `npm run build` and the `dist/` output directory.
+3. Set `VITE_API_BASE` to the deployed API URL. Set the backend's `APP_BASE_URL` and `CORS_ALLOWED_ORIGINS` to the frontend origin.
 4. Add the deployed frontend's `/index.html` URL to Supabase Auth's redirect allow-list.
-5. Configure recurring QStash **POST** deliveries to the API's `/jobs/sweep-orphans` and `/jobs/deferred-delete` endpoints. Both validate the `Upstash-Signature` header.
+5. Configure recurring QStash **POST** deliveries to `/jobs/sweep-orphans` and `/jobs/deferred-delete`.
 
-Cleanup is scheduled externally; running the API alone does not start an in-process cron. See the [jobs module](telecloud/jobs/README.md) for retry behavior and cleanup semantics.
+See [`HOSTING.md`](HOSTING.md) for the provider-neutral deployment and latency checklist. Cleanup is scheduled externally; running the API alone does not start an in-process cron.
 
 ## Tests and build
 

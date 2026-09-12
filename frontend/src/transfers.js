@@ -194,7 +194,7 @@ export function startDownload(fileId) {
 
       // Stream the body so the panel shows live progress + ETA instead of a
       // silent wait. (Native browser-download-tab progress would require an
-      // auth-free signed URL from the backend — see BACKEND_RENDER_BRIEF.md.)
+      // auth-free signed URL from the backend.)
       const chunks = [];
       if (res.body && res.body.getReader) {
         const reader = res.body.getReader();
