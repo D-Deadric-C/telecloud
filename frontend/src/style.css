@@ -569,13 +569,34 @@ body:has(#dashboard-view.active) .theme-toggle-btn { display: none; }
 .auth-logo-mobile {
   display: none;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
   font-family: var(--font-pixel);
   font-weight: 700;
   font-size: 15px;
   margin-bottom: 18px;
   color: var(--text-primary);
 }
+.auth-mobile-brand { display: inline-flex; align-items: center; gap: 10px; }
+.auth-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--btn-shadow);
+  transition: color 0.15s ease, background-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+.auth-theme-toggle svg { width: 19px; height: 19px; }
+.auth-theme-toggle:hover { color: var(--text-primary); background: var(--bg-hover); }
+.auth-theme-toggle:active { transform: translate(2px, 2px); box-shadow: none; }
 .auth-header h2 {
   font-family: var(--font-display);
   font-size: 20px;
@@ -1978,8 +1999,16 @@ a.name-cell:hover .row-name { color: var(--accent-hover); text-decoration: under
 
 @media (max-width: 767px) {
   /* Auth / status shells */
-  .auth-panel { padding: 28px 16px; }
-  .auth-card { padding: 26px 20px 22px; }
+  body:has(#auth-view.active) > .theme-toggle-btn { display: none; }
+  .auth-panel {
+    justify-content: flex-start;
+    padding: max(18px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    gap: 16px;
+  }
+  .auth-card { padding: 20px 20px 22px; }
+  .auth-card::after { display: none; }
+  .auth-header { margin-bottom: 18px; }
+  .auth-logo-mobile { margin-bottom: 20px; }
   .auth-card .btn-submit { white-space: normal; }
   .public-card { padding: 26px 20px 18px; }
 

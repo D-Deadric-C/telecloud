@@ -9,9 +9,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.WindowInsets;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
@@ -46,12 +48,32 @@ public final class MainActivity extends Activity {
         errorPanel = findViewById(R.id.error_panel);
         findViewById(R.id.retry_button).setOnClickListener(view -> loadHome());
 
+        applySystemBarInsets(findViewById(R.id.app_root));
+
         configureWebView();
         if (savedInstanceState == null) {
             loadHome();
         } else {
             webView.restoreState(savedInstanceState);
         }
+    }
+
+    private void applySystemBarInsets(View root) {
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            } else {
+                view.setPadding(
+                        insets.getSystemWindowInsetLeft(),
+                        insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight(),
+                        insets.getSystemWindowInsetBottom()
+                );
+            }
+            return insets;
+        });
+        root.requestApplyInsets();
     }
 
     private void configureWebView() {
