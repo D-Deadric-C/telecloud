@@ -11,6 +11,14 @@ const API_PREFIXES = ['/auth', '/users', '/folders', '/files', '/shares', '/s/',
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  if (mode === 'production') {
+    const required = ['VITE_API_BASE', 'VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'];
+    const missing = required.filter((name) => !env[name]?.trim());
+    if (missing.length) {
+      throw new Error(`Missing required production configuration: ${missing.join(', ')}`);
+    }
+  }
+
   // Where the dev proxy forwards API calls. Override with DEV_API_TARGET if your
   // backend isn't on the default port.
   const target = env.DEV_API_TARGET || 'http://127.0.0.1:8000';
