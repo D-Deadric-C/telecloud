@@ -14,12 +14,27 @@ const K_EXPIRY = 'token_expiry'; // epoch ms
 const K_USER = 'user'; // cached PublicUser, so a refresh can show the app instantly
 
 function readUser() {
-  try { return JSON.parse(localStorage.getItem(K_USER) || 'null'); } catch { return null; }
+  try {
+    const value = JSON.parse(localStorage.getItem(K_USER) || 'null');
+    return value && typeof value === 'object' ? value : null;
+  } catch {
+    localStorage.removeItem(K_USER);
+    return null;
+  }
+}
+
+function readToken(key) {
+  const value = localStorage.getItem(key);
+  if (!value || value === 'null' || value === 'undefined') {
+    localStorage.removeItem(key);
+    return null;
+  }
+  return value;
 }
 
 export const session = {
-  access: localStorage.getItem(K_ACCESS) || null,
-  refresh: localStorage.getItem(K_REFRESH) || null,
+  access: readToken(K_ACCESS),
+  refresh: readToken(K_REFRESH),
   expiresAt: Number(localStorage.getItem(K_EXPIRY)) || 0,
   user: readUser(), // PublicUser {id, email, email_verified}, restored across reloads
 };
@@ -37,13 +52,19 @@ export function setUser(user) {
 }
 
 export function setSession({ access_token, refresh_token, expires_in, user }) {
-  if (access_token !== undefined) session.access = access_token;
-  if (refresh_token) session.refresh = refresh_token;
+  if (access_token !== undefined) {
+    session.access = typeof access_token === 'string' && access_token ? access_token : null;
+  }
+  if (refresh_token !== undefined) {
+    session.refresh = typeof refresh_token === 'string' && refresh_token ? refresh_token : null;
+  }
   if (expires_in) session.expiresAt = Date.now() + Number(expires_in) * 1000;
   if (user) setUser(user);
 
   if (session.access) localStorage.setItem(K_ACCESS, session.access);
+  else localStorage.removeItem(K_ACCESS);
   if (session.refresh) localStorage.setItem(K_REFRESH, session.refresh);
+  else localStorage.removeItem(K_REFRESH);
   if (session.expiresAt) localStorage.setItem(K_EXPIRY, String(session.expiresAt));
 }
 
@@ -109,8 +130,8 @@ export async function refreshAccessToken() {
       body: JSON.stringify({ refresh_token: session.refresh }),
     });
     if (!res.ok) throw new Error('Session refresh failed.');
-    const data = await res.json();
-    if (!data.access_token) throw new Error('Session refresh returned no token.');
+    const data = await res.json().catch(() => null);
+    if (!data?.access_token) throw new Error('Session refresh returned no token.');
     setSession({
       access_token: data.access_token,
       refresh_token: data.refresh_token,

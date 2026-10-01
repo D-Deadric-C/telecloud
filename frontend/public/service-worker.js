@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'telecloud-shell-v6';
+const CACHE_VERSION = 'telecloud-shell-v7';
 const SHELL_FILES = [
   '/',
   '/index.html',

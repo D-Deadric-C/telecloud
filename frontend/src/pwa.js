@@ -6,12 +6,34 @@ function isStandalone() {
     || window.navigator.standalone === true;
 }
 
+function isAndroidContainer() {
+  return typeof window.TeleCloudAndroid !== 'undefined';
+}
+
+async function removeBrowserAppCaches() {
+  const tasks = [];
+  if ('serviceWorker' in navigator) {
+    tasks.push(
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister()))),
+    );
+  }
+  if ('caches' in window) {
+    tasks.push(
+      caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))),
+    );
+  }
+  await Promise.allSettled(tasks);
+}
+
 function isIos() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
 function syncInstallButtons() {
-  const canInstall = !isStandalone() && (Boolean(deferredInstallPrompt) || isIos());
+  const canInstall = !isAndroidContainer()
+    && !isStandalone()
+    && (Boolean(deferredInstallPrompt) || isIos());
   document.querySelectorAll('.install-app-link').forEach((button) => {
     button.hidden = !canInstall;
   });
@@ -19,6 +41,15 @@ function syncInstallButtons() {
 
 export function initPwa(onMessage = () => {}) {
   notify = onMessage;
+
+  // The Android APK already provides the installable app shell. Keeping a web
+  // service worker inside its WebView can preserve an old JavaScript bundle
+  // across APK upgrades, so remove browser-level app caches in the container.
+  if (isAndroidContainer()) {
+    removeBrowserAppCaches();
+    syncInstallButtons();
+    return;
+  }
 
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();

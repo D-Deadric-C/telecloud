@@ -43,6 +43,9 @@ export async function handleAuthSubmit(event) {
   try {
     if (isLogin) {
       const data = await Auth.login(email, password);
+      if (typeof data.access_token !== 'string' || !data.access_token || !data.user) {
+        throw new Error('Login returned an incomplete session. Please try again.');
+      }
       setSession({
         access_token: data.access_token,
         refresh_token: data.refresh_token,
@@ -54,20 +57,21 @@ export async function handleAuthSubmit(event) {
       loadDashboard();
     } else {
       const data = await Auth.signup(email, password);
-      state.pendingVerificationEmail = data.email || email;
+      state.pendingVerificationEmail = data?.email || email;
       localStorage.setItem('pending_verification_email', state.pendingVerificationEmail);
-      showToast(data.message || 'Check your email for a verification link.');
+      showToast(data?.message || 'Check your email for a verification link.');
       transitionToView('verify-view');
     }
   } catch (err) {
     // Supabase rejects login until the email is confirmed.
-    if (/not confirmed|not verified|confirm your email/i.test(err.message)) {
+    const message = err?.message || 'Authentication failed. Please try again.';
+    if (/not confirmed|not verified|confirm your email/i.test(message)) {
       state.pendingVerificationEmail = email;
       localStorage.setItem('pending_verification_email', email);
       showToast('Please verify your email first. Check your inbox.', 'error');
       transitionToView('verify-view');
     } else {
-      showToast(err.message, 'error');
+      showToast(message, 'error');
     }
   } finally {
     submitBtn.disabled = false;
@@ -90,7 +94,7 @@ export async function resendVerificationEmail() {
       throw new Error(data.error?.message || 'Could not send verification email.');
     }
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(err?.message || 'Could not resend the verification email.', 'error');
   }
 }
 
@@ -109,7 +113,7 @@ export async function handleTryDemo(button) {
     transitionToView('dashboard-view');
     loadDashboard();
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(err?.message || 'Demo sign-in failed. Please try again.', 'error');
   } finally {
     button.disabled = false;
     button.innerHTML = original;

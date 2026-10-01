@@ -153,7 +153,7 @@ async function initializeApp() {
   try {
     const fresh = await Auth.me();
     setUser(fresh);
-    if (fresh.email && !fresh.email_verified) {
+    if (fresh?.email && !fresh.email_verified) {
       transitionToView('verify-view');
     } else if (!cached || showedVerify) {
       // First confirmation (no cache) or just-verified — (re)enter the dashboard.

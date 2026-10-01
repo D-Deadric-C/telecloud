@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -23,6 +24,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.URLUtil;
@@ -30,13 +32,16 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public final class MainActivity extends Activity {
-    private static final String HOME_URL = "https://telecloud.web.app";
+    private static final String WEB_RUNTIME_REVISION = "auth-v2";
+    private static final String HOME_URL = "https://telecloud.web.app/?native_app=android&runtime="
+            + WEB_RUNTIME_REVISION;
     private static final int FILE_CHOOSER_REQUEST = 10;
 
     private WebView webView;
     private ProgressBar progress;
     private View errorPanel;
     private ValueCallback<Uri[]> fileChooserCallback;
+    private boolean forceFreshWebRuntime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,15 @@ public final class MainActivity extends Activity {
         progress = findViewById(R.id.progress);
         errorPanel = findViewById(R.id.error_panel);
         findViewById(R.id.retry_button).setOnClickListener(view -> loadHome());
+
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        forceFreshWebRuntime = !WEB_RUNTIME_REVISION.equals(
+                preferences.getString("web_runtime_revision", "")
+        );
+        if (forceFreshWebRuntime) {
+            webView.clearCache(true);
+            WebStorage.getInstance().deleteAllData();
+        }
 
         applySystemBarInsets(findViewById(R.id.app_root));
 
@@ -81,7 +95,9 @@ public final class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setCacheMode(forceFreshWebRuntime
+                ? WebSettings.LOAD_NO_CACHE
+                : WebSettings.LOAD_DEFAULT);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
@@ -95,6 +111,16 @@ public final class MainActivity extends Activity {
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 errorPanel.setVisibility(View.GONE);
                 webView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (!forceFreshWebRuntime || !url.startsWith("https://telecloud.web.app")) return;
+                forceFreshWebRuntime = false;
+                view.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+                getPreferences(MODE_PRIVATE).edit()
+                        .putString("web_runtime_revision", WEB_RUNTIME_REVISION)
+                        .apply();
             }
 
             @Override
@@ -243,6 +269,11 @@ public final class MainActivity extends Activity {
     }
 
     private final class TeleCloudBridge {
+        @JavascriptInterface
+        public boolean isNativeApp() {
+            return true;
+        }
+
         @JavascriptInterface
         public void download(String url, String accessToken, String requestedName) {
             Uri uri = Uri.parse(url);
