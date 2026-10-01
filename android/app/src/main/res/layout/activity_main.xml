@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/telecloud_navy">
+
+    <WebView
+        android:id="@+id/web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="top"
+        android:max="100"
+        android:progressTint="@color/telecloud_blue"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/error_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offline_title"
+            android:textColor="@color/telecloud_white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/offline_message"
+            android:textColor="#B9C7E5"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/retry_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="22dp"
+            android:minWidth="120dp"
+            android:text="@string/retry" />
+    </LinearLayout>
+
+</FrameLayout>

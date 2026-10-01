@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TeleCloud</string>
+    <string name="offline_title">TeleCloud is offline</string>
+    <string name="offline_message">Check your connection and try again.</string>
+    <string name="retry">Retry</string>
+</resources>
