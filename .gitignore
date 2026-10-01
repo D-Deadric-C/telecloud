@@ -6,6 +6,8 @@
 
 # --- Node / frontend ---
 node_modules/
+artifacts/*.apk
+frontend/.firebase/
 
 # --- Python ---
 __pycache__/

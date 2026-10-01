@@ -174,7 +174,7 @@ export function startUpload(file, folderId, { onComplete } = {}) {
   enqueue(job);
 }
 
-export function startDownload(fileId) {
+export function startDownload(fileId, fileName = 'TeleCloud-file') {
   const job = {
     id: `d${++seq}`, kind: 'download', fileId, name: 'Download',
     size: 0, loaded: 0, status: 'queued', startTime: 0,
@@ -182,6 +182,22 @@ export function startDownload(fileId) {
   job.run = async () => {
     try {
       if (needsRefreshSoon()) { try { await refreshAccessToken(); } catch { /* handled below */ } }
+
+      // The Android shell streams authenticated files through DownloadManager,
+      // avoiding WebView's unreliable blob-URL download behavior.
+      if (window.TeleCloudAndroid && typeof window.TeleCloudAndroid.download === 'function') {
+        job.name = fileName;
+        relabel(job);
+        window.TeleCloudAndroid.download(
+          `${API_BASE}/files/${encodeURIComponent(fileId)}`,
+          session.access,
+          fileName,
+        );
+        finish(job, true);
+        showToast(`Downloading "${fileName}".`);
+        return;
+      }
+
       const res = await Files.download(fileId); // auth + refresh-on-401 + retry, no timeout
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));

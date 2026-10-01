@@ -356,7 +356,7 @@ function buildFileRowHtml(file) {
     <td>${formatDate(file.created_at)}</td>
     <td>
       <div class="actions-cell">
-        <button class="btn-icon" title="Download" data-action="download" data-id="${file.id}"><i data-lucide="download" style="width:16px;height:16px;"></i></button>
+        <button class="btn-icon" title="Download" data-action="download" data-id="${file.id}" data-name="${name}"><i data-lucide="download" style="width:16px;height:16px;"></i></button>
         <button class="btn-icon" title="Share" data-action="share" data-id="${file.id}" data-name="${name}"><i data-lucide="link-2" style="width:16px;height:16px;"></i></button>
         <button class="btn-icon" title="Rename" data-action="rename" data-type="file" data-id="${file.id}" data-name="${name}"><i data-lucide="edit-2" style="width:16px;height:16px;"></i></button>
         <button class="btn-icon" title="Move" data-action="move" data-type="file" data-id="${file.id}" data-name="${name}"><i data-lucide="folder-input" style="width:16px;height:16px;"></i></button>
@@ -400,7 +400,7 @@ function buildFileCardHtml(file) {
   return `
     ${buildMenuBtnHtml()}
     <div class="grid-card-actions">
-      <button class="btn-icon" title="Download" data-action="download" data-id="${file.id}"><i data-lucide="download"></i></button>
+      <button class="btn-icon" title="Download" data-action="download" data-id="${file.id}" data-name="${name}"><i data-lucide="download"></i></button>
       <button class="btn-icon" title="Share" data-action="share" data-id="${file.id}" data-name="${name}"><i data-lucide="link-2"></i></button>
       <button class="btn-icon" title="Rename" data-action="rename" data-type="file" data-id="${file.id}" data-name="${name}"><i data-lucide="edit-2"></i></button>
       <button class="btn-icon" title="Move" data-action="move" data-type="file" data-id="${file.id}" data-name="${name}"><i data-lucide="folder-input"></i></button>
@@ -619,8 +619,8 @@ export async function deleteFolder(folderId) {
 
 // ---- Download (streamed, with progress + ETA in the transfers panel) --------
 
-export function downloadFile(fileId) {
-  startDownload(fileId);
+export function downloadFile(fileId, fileName) {
+  startDownload(fileId, fileName);
 }
 
 // ---- Upload (multiple files, concurrent, via the transfers manager) --------

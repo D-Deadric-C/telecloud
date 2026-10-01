@@ -87,7 +87,7 @@ registerActions({
   'move-submit': (el, e) => submitMove(e),
   'delete-file': (el) => deleteFile(el.dataset.id),
   'delete-folder': (el) => deleteFolder(el.dataset.id),
-  'download': (el) => downloadFile(el.dataset.id),
+  'download': (el) => downloadFile(el.dataset.id, el.dataset.name),
   // upload
   'trigger-upload': () => triggerUpload(),
   'dismiss-upload': () => dismissUploadPanel(),
