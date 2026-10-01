@@ -139,6 +139,12 @@ export async function requestJson(path, opts = {}) {
       code: data?.error?.code || null,
     });
   }
+  if (data === null || typeof data !== 'object') {
+    throw new ApiError('The server returned an invalid response. Please try again.', {
+      status: res.status,
+      code: 'invalid_response',
+    });
+  }
   return data;
 }
 
