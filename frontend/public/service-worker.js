@@ -1,11 +1,12 @@
-const CACHE_VERSION = 'telecloud-shell-v3';
+const CACHE_VERSION = 'telecloud-shell-v4';
 const SHELL_FILES = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/icons/telecloud-logo-v2-192.png',
-  '/icons/telecloud-logo-v2-512.png',
-  '/icons/telecloud-logo-v2-maskable-512.png',
+  '/icons/telecloud.svg',
+  '/icons/telecloud-192.png',
+  '/icons/telecloud-512.png',
+  '/icons/telecloud-maskable-512.png',
 ];
 const API_PATHS = ['/auth', '/users', '/folders', '/files', '/shares', '/s/', '/jobs', '/health'];
 

@@ -208,13 +208,13 @@ a:hover { text-decoration: underline; }
   justify-content: center;
   width: 34px; height: 34px;
   border-radius: 9px;
-  background: var(--grad-brand);
-  border: 2px solid var(--ink);
-  color: #ffffff;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
   box-shadow: var(--shadow-glow);
   flex-shrink: 0;
 }
-.brand-glyph svg { width: 18px; height: 18px; }
+.brand-glyph img { display: block; width: 100%; height: 100%; object-fit: contain; }
 
 .brand-name {
   font-family: var(--font-pixel);
@@ -524,7 +524,7 @@ body:has(#dashboard-view.active) .theme-toggle-btn { display: none; }
 .brand-features li:nth-child(1) .feature-icon { color: var(--orange); }
 .brand-features li:nth-child(2) .feature-icon { color: var(--accent); }
 .brand-features li:nth-child(3) .feature-icon { color: var(--success); }
-.brand-features li:nth-child(4) .feature-icon { color: #8b5cf6; }
+.brand-features li:nth-child(4) .feature-icon { color: var(--terminal-green); }
 
 .brand-features strong {
   display: block;
@@ -967,7 +967,7 @@ body:has(#dashboard-view.active) .theme-toggle-btn { display: none; }
 .user-avatar {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: #8b5cf6;
+  background: var(--accent);
   border: 2px solid var(--frame);
   color: #ffffff;
   display: flex;
@@ -1800,7 +1800,7 @@ a.name-cell:hover .row-name { color: var(--accent-hover); text-decoration: under
   margin-bottom: 26px;
 }
 .public-logo .brand-glyph { width: 28px; height: 28px; border-radius: 7px; }
-.public-logo .brand-glyph svg { width: 15px; height: 15px; }
+.public-logo .brand-glyph img { width: 100%; height: 100%; }
 
 .public-file-icon {
   display: inline-flex;
